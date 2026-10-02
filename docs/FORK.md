@@ -46,13 +46,40 @@ To rebase a seam branch onto the latest upstream: `git switch up/<seam>; git reb
 
 ## Site and links
 
-- The site is https://derprito64bit.github.io/: `site/` at the root, the Unity Web build at `/play/` (`?zone=gallery`, `?zone=game`), arcade demos at `/arcade/<slug>/`. `scripts/fork/publish.ps1` publishes it to `gh-pages`. Upstream's Pages workflow (`.github/workflows/web.yml`, BUILD.md §5) is not used here.
+- The site is https://derprito64bit.github.io/, served from the `gh-pages` branch (legacy Pages). Upstream's Pages workflow (`.github/workflows/web.yml`, BUILD.md §5) is not used here: it is manual-only, and dispatching it on the fork would deploy the bare Unity build through Actions Pages instead of the composed `gh-pages` tree, so don't.
 - "This site / this repo / play here" links point at the fork. Credits to Vasiniks and the original repo stay.
 - Fork-only link edits in upstream-owned files. Keep the fork side when merging upstream, until a site-config seam replaces them:
   - `README.md`: the portfolio intro above the original README, and its **Play** link.
   - `Assets/WebGLTemplates/Ion/index.html`: both "View projects" links.
   - `Assets/Scripts/Presentation/EndCard.cs`: `ProjectsUrl`.
 - `companyName` stays `vasiniks` (ProjectSetup, ProjectSettings): it names the game's publisher, and changing it moves the editor's PlayerPrefs.
+
+## Deploy
+
+`scripts/fork/publish.ps1` composes the whole domain in a temp clone of `gh-pages` and pushes it (never a force push):
+
+| Path | Source |
+|---|---|
+| `/` | `portfolio-site/dist` (next to this repo) once it has an `index.html`; until then the fork's `site/` landing page. `404.html` only if the site has one. |
+| `/manor/` | The Unity Web build (`Build/Web`). Its `index.html` gets a phone guard (touch screens under 820 px go to `/?from=manor`; `?force=1` skips it) and `robots noindex`, injected at publish time. The WebGL template stays untouched. |
+| `/play/` | A redirect stub to `/manor/` that keeps the query string and hash, so old links still work. |
+| `/arcade/` | `site/arcade/`: HTML5 demos shared by the site and the Manor's cabinet (`../arcade/<slug>/` from `/manor/`). |
+| `.nojekyll` | Always. |
+
+The Manor takes `?zone=gallery`, `?zone=game` or any zone key. Before committing, every relative link in the staged HTML must resolve; broken links are listed by page and stop the publish.
+
+```powershell
+powershell -File scripts/ion.ps1 build                          # Build/Web
+powershell -File scripts/fork/sync-content.ps1 -Check            # is the Manor's content current? (exit 1 = no)
+powershell -File scripts/fork/sync-content.ps1                   # copy it, then rebuild
+powershell -File scripts/fork/publish.ps1 -DryRun                # compose, check links, commit in the temp clone only
+powershell -File scripts/fork/publish.ps1 -Message "Deploy the Manor"
+powershell -File scripts/fork/publish.ps1 -NoManor               # site-only deploy; keeps the published /manor/
+```
+
+Other options: `-Build <dir>`, `-SiteDist <dir>`, `-AllowBroken`, `-Remote <url>`.
+
+**Content.** `portfolio-site/content` is the source of truth. `sync-content.ps1` copies `projects.json`, `awards.json` (optional) and `tokens.json` (as `identity.json`) into `Assets/Portfolio/Resources/Portfolio/` after checking that each parses, has an object at the top level (JsonUtility cannot read a bare array) and, for projects, that every entry is an object with a `slug` and a `title`. Exit codes: 0 copied or in sync, 1 out of sync (`-Check`), 2 source missing, 3 invalid JSON.
 
 ## Storage policy
 
