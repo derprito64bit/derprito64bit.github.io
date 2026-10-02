@@ -8,8 +8,9 @@
   non-zero when Unity fails or a test fails. Only one Unity process may have the project open: the runner
   refuses to start while Temp/UnityLockfile is held (close the editor, or use the Unity MCP tools instead).
 
-  After 'setup' the runner restores regenerated files that differ from git only in fileIDs or line endings
-  (ProjectSetup rewrites Main.unity and the settings assets on every run); pass -KeepChurn to keep them.
+  After setup, builds and test runs the runner restores regenerated files that differ from git only in
+  fileIDs or line endings (ProjectSetup and WebBuild rewrite Main.unity and the settings assets on every
+  run); pass -KeepChurn to keep them.
 
 .EXAMPLE
   powershell -File scripts/ion.ps1 setup -Twice     # fresh checkout (BUILD.md: run setup twice the first time)
@@ -133,27 +134,32 @@ function Restore-SetupChurn {
     finally { Pop-Location }
 }
 
+function Exit-Clean([int]$Code) {
+    # Setup, builds and test runs all re-apply project settings, which rewrites tracked assets.
+    if (-not $KeepChurn) { Restore-SetupChurn }
+    exit $Code
+}
+
 switch ($Command) {
     'unity-path' { Get-UnityExe; exit 0 }
     'setup' {
         $passes = if ($Twice) { 2 } else { 1 }
         for ($i = 1; $i -le $passes; $i++) {
             $code = Invoke-Unity "setup$i" @('-nographics', '-quit', '-executeMethod', 'Ion.EditorTools.ProjectSetup.Run')
-            if ($code -ne 0) { exit $code }
+            if ($code -ne 0) { Exit-Clean $code }
             Select-String -Path (Join-Path $Logs "setup$i.log") -Pattern '\[Ion\]' | ForEach-Object { Write-Host ('  ' + $_.Line.Trim()) }
         }
-        if (-not $KeepChurn) { Restore-SetupChurn }
-        exit 0
+        Exit-Clean 0
     }
-    'test-edit' { exit (Invoke-Tests 'EditMode') }
-    'test-play' { exit (Invoke-Tests 'PlayMode') }
+    'test-edit' { Exit-Clean (Invoke-Tests 'EditMode') }
+    'test-play' { Exit-Clean (Invoke-Tests 'PlayMode') }
     'test' {
         $e = Invoke-Tests 'EditMode'
         $p = Invoke-Tests 'PlayMode'
-        exit ([int]($e -ne 0 -or $p -ne 0))
+        Exit-Clean ([int]($e -ne 0 -or $p -ne 0))
     }
-    'build' { exit (Invoke-Unity 'build' @('-nographics', '-quit', '-buildTarget', 'WebGL', '-executeMethod', 'Ion.EditorTools.WebBuild.Build')) }
-    'build-dev' { exit (Invoke-Unity 'build-dev' @('-nographics', '-quit', '-buildTarget', 'WebGL', '-executeMethod', 'Ion.EditorTools.WebBuild.BuildDev')) }
+    'build' { Exit-Clean (Invoke-Unity 'build' @('-nographics', '-quit', '-buildTarget', 'WebGL', '-executeMethod', 'Ion.EditorTools.WebBuild.Build')) }
+    'build-dev' { Exit-Clean (Invoke-Unity 'build-dev' @('-nographics', '-quit', '-buildTarget', 'WebGL', '-executeMethod', 'Ion.EditorTools.WebBuild.BuildDev')) }
     'serve' {
         $dir = Join-Path $Root 'Build\Web'
         if (-not (Test-Path (Join-Path $dir 'index.html'))) { throw "No build at $dir. Run: powershell -File scripts/ion.ps1 build" }
