@@ -53,6 +53,18 @@ function Copy-Contents([string]$From, [string]$To, [string[]]$Skip) {
     }
 }
 
+# True when every segment of $Path below $Base exists with exactly that case (GitHub Pages is case-sensitive,
+# Windows is not).
+function Test-ExactCase([string]$Base, [string]$Path) {
+    $dir = $Base
+    foreach ($seg in $Path.Substring($Base.Length).Split([char[]]'\', [StringSplitOptions]::RemoveEmptyEntries)) {
+        $names = @([IO.Directory]::GetFileSystemEntries($dir) | ForEach-Object { [IO.Path]::GetFileName($_) })
+        if (-not ($names -ccontains $seg)) { return $false }
+        $dir = Join-Path $dir $seg
+    }
+    return $true
+}
+
 # ---- Inputs
 if (-not $Build) { $Build = Join-Path $root 'Build\Web' }
 if (-not $SiteDist) {
@@ -142,7 +154,8 @@ Get-ChildItem $work -Recurse -File -Filter *.html | Where-Object { $_.FullName -
         $ok = $false
         if ($target.TrimEnd('\') -eq $workFull -or $target.StartsWith("$workFull\")) {
             if (Test-Path -LiteralPath $target -PathType Leaf) { $ok = -not $path.EndsWith('/') }
-            elseif (Test-Path -LiteralPath $target -PathType Container) { $ok = Test-Path -LiteralPath (Join-Path $target 'index.html') }
+            elseif (Test-Path -LiteralPath $target -PathType Container) { $target = Join-Path $target 'index.html'; $ok = Test-Path -LiteralPath $target }
+            if ($ok) { $ok = Test-ExactCase $workFull $target }
         }
         if (-not $ok) { $broken += [pscustomobject]@{ Page = $rel; Url = $url } }
     }
@@ -167,11 +180,12 @@ else { Write-Host 'Links: all relative links resolve.' }
 
 # ---- Commit and push
 $sha = ([string](& git.exe -C $root rev-parse --short HEAD)).Trim()
-& git.exe -C $work -c core.autocrlf=false add -A
+# autocrlf=input stores text files with LF, as gh-pages has them, so CRLF working copies add no diff noise.
+& git.exe -C $work -c core.autocrlf=input -c core.safecrlf=false add -A
 if ($LASTEXITCODE -ne 0) { throw 'git add failed in the staged tree.' }
 & git.exe -C $work diff --cached --quiet
 if ($LASTEXITCODE -eq 0) { Write-Host 'Nothing changed; nothing to publish.'; exit 0 }
-& git.exe -C $work commit -q -m "$Message ($sha)" -m 'Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>'
+& git.exe -C $work commit -q -m "$Message ($sha)"
 if ($LASTEXITCODE -ne 0) { throw 'Commit failed in the staged tree.' }
 & git.exe -C $work show --stat --oneline HEAD | Select-Object -First 30
 

@@ -61,12 +61,12 @@ To rebase a seam branch onto the latest upstream: `git switch up/<seam>; git reb
 | Path | Source |
 |---|---|
 | `/` | `portfolio-site/dist` (next to this repo) once it has an `index.html`; until then the fork's `site/` landing page. `404.html` only if the site has one. |
-| `/manor/` | The Unity Web build (`Build/Web`). Its `index.html` gets a phone guard (touch screens under 820 px go to `/?from=manor`; `?force=1` skips it) and `robots noindex`, injected at publish time. The WebGL template stays untouched. |
+| `/manor/` | The Unity Web build (`Build/Web`). Its `index.html` gets a phone guard (touch screens under 820 px go to `/?from=manor`, where the landing page says why and links `manor/?force=1`, which skips the guard) and `robots noindex`, injected at publish time. The WebGL template stays untouched. |
 | `/play/` | A redirect stub to `/manor/` that keeps the query string and hash, so old links still work. |
 | `/arcade/` | `site/arcade/`: HTML5 demos shared by the site and the Manor's cabinet (`../arcade/<slug>/` from `/manor/`). |
 | `.nojekyll` | Always. |
 
-The Manor takes `?zone=gallery`, `?zone=game` or any zone key. Before committing, every relative link in the staged HTML must resolve; broken links are listed by page and stop the publish.
+The Manor takes `?zone=gallery`, `?zone=game` or any zone key. Before committing, every relative link in the staged HTML must resolve with the exact case (Pages is case-sensitive); broken links are listed by page and stop the publish.
 
 ```powershell
 powershell -File scripts/ion.ps1 build                          # Build/Web
@@ -79,7 +79,7 @@ powershell -File scripts/fork/publish.ps1 -NoManor               # site-only dep
 
 Other options: `-Build <dir>`, `-SiteDist <dir>`, `-AllowBroken`, `-Remote <url>`.
 
-**Content.** `portfolio-site/content` is the source of truth. `sync-content.ps1` copies `projects.json`, `awards.json` (optional) and `tokens.json` (as `identity.json`) into `Assets/Portfolio/Resources/Portfolio/` after checking that each parses, has an object at the top level (JsonUtility cannot read a bare array) and, for projects, that every entry is an object with a `slug` and a `title`. Exit codes: 0 copied or in sync, 1 out of sync (`-Check`), 2 source missing, 3 invalid JSON.
+**Content.** `portfolio-site/content` is the source of truth. `sync-content.ps1` copies `projects.json`, `awards.json` (optional) and `tokens.json` (as `identity.json`) into `Assets/Portfolio/Resources/Portfolio/` after checking that each parses, has an object at the top level (JsonUtility cannot read a bare array) and, for projects, that every entry is an object with a `slug` and a `title`. An `awards.json` left behind after it leaves the source is reported as an orphan, never deleted. Exit codes: 0 copied or in sync, 1 out of sync (`-Check`), 2 source missing, 3 invalid JSON.
 
 ## Storage policy
 

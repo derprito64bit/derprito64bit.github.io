@@ -9,7 +9,7 @@ namespace Ion.Portfolio
 {
     /// <summary>
     /// The Grand Gallery's arcade cabinet: E ("play") opens the project demo at <see cref="Url"/> (a page of the
-    /// site, relative to /manor/) in the arcade overlay. Serialized fields only, so a photo copy works too.
+    /// site, relative to /play/) in the arcade overlay. Serialized fields only, so a photo copy works too.
     /// </summary>
     public sealed class ArcadeMachine : UsableBehaviour
     {

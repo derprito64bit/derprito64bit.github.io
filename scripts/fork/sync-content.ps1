@@ -9,7 +9,8 @@
     tokens.json        ->  identity.json   (required)
 
   Every file must parse as JSON with an object at the top level (JsonUtility cannot read a bare array).
-  -Check compares only (line endings ignored) and copies nothing.
+  -Check compares only (line endings ignored) and copies nothing. An awards.json left in Resources after it
+  was removed from the source is reported as an orphan (a warning; nothing is ever deleted).
 
   Exit codes: 0 copied or in sync, 1 -Check found differences, 2 source folder or required file missing,
   3 invalid JSON.
@@ -85,6 +86,13 @@ foreach ($f in $files) {
     else { $state = 'differs' }
     if ($state -ne 'same') { $changed++ }
     Write-Host ('  {0,-8} {1} -> {2}' -f $state, $f.From, $f.To)
+}
+# An optional file dropped from the source leaves its old copy behind: say so (it is never deleted here).
+foreach ($e in $map) {
+    if ($e.Required -or ($files | Where-Object { $_.From -eq $e.From })) { continue }
+    if (Test-Path -LiteralPath (Join-Path $Destination $e.To)) {
+        Write-Host ('  {0,-8} {1} is not in the source; delete it (and its .meta) if it is stale' -f 'orphan', $e.To)
+    }
 }
 
 if ($Check) {
