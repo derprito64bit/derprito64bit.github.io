@@ -7,7 +7,8 @@ namespace Ion.Gameplay
 {
     /// <summary>
     /// Owns the HUD prompt line (single writer, so prompts never fight) and E: pick up a photo, press a
-    /// switch, take the instant camera. Prompts use the bracket key style: "[SHIFT] hold up photo".
+    /// switch, take the instant camera, or use any other <see cref="IUsable"/> (exhibits, terminals, cabinets).
+    /// Prompts use the bracket key style: "[SHIFT] hold up photo".
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class PlayerInteractor : MonoBehaviour
@@ -44,6 +45,9 @@ namespace Ion.Gameplay
         /// <summary>The switch currently in reach (E presses it), or null.</summary>
         public Switch FocusedSwitch { get; private set; }
 
+        /// <summary>The usable currently in reach (E uses it), or null. Pickups and switches come first.</summary>
+        public IUsable FocusedUsable { get; private set; }
+
         void Awake()
         {
             _fpc = GetComponent<FirstPersonController>();
@@ -57,6 +61,7 @@ namespace Ion.Gameplay
         {
             Focused = null;
             FocusedSwitch = null;
+            FocusedUsable = null;
             GameplayUI.SetPrompt(string.Empty);
         }
 
@@ -70,6 +75,7 @@ namespace Ion.Gameplay
 
             Focused = free ? FindFocusedPickup() : null;
             FocusedSwitch = free && Focused == null ? FindFocusedSwitch() : null;
+            FocusedUsable = free && Focused == null && FocusedSwitch == null ? FindFocusedUsable() : null;
 
             var kb = Keyboard.current;
             if (kb != null && IonInput.Active && kb.eKey.wasPressedThisFrame && free)
@@ -82,6 +88,10 @@ namespace Ion.Gameplay
                 else if (FocusedSwitch != null)
                 {
                     FocusedSwitch.Press();
+                }
+                else if (FocusedUsable != null)
+                {
+                    FocusedUsable.Use();
                 }
             }
 
@@ -98,6 +108,15 @@ namespace Ion.Gameplay
             return s != null && s.Press();
         }
 
+        /// <summary>Uses the usable in reach and in view (what E does when nothing else is focused). False if none.</summary>
+        public bool UseFocused()
+        {
+            IUsable u = FocusedUsable ?? FindFocusedUsable();
+            if (u == null || !u.CanUse) return false;
+            u.Use();
+            return true;
+        }
+
         string ChoosePrompt(bool holderRaised, bool cameraMode)
         {
             if (_tracker != null && _tracker.IsFalling) return PromptFalling;
@@ -112,6 +131,7 @@ namespace Ion.Gameplay
             if (FocusedSwitch != null)
                 return !FocusedSwitch.Powered ? PromptNoPower
                     : FocusedSwitch.Kind == Switch.SwitchKind.Lever ? PromptPull : PromptPress;
+            if (FocusedUsable != null) return K_E + " " + FocusedUsable.UsePrompt;
             if (_inventory != null && _inventory.Count > 0 && _holder != null && !_holder.HasRaisedOnce)
                 return PromptRaiseHint;
             return string.Empty;
@@ -168,6 +188,35 @@ namespace Ion.Gameplay
                 float score = dist * (2f - facing);
                 if (score >= bestScore) continue;
                 best = s;
+                bestScore = score;
+            }
+            return best;
+        }
+
+        IUsable FindFocusedUsable()
+        {
+            var cam = _fpc != null ? _fpc.Camera : null;
+            if (cam == null) return null;
+
+            Vector3 eye = cam.transform.position;
+            Vector3 fwd = cam.transform.forward;
+            IUsable best = null;
+            float bestScore = float.MaxValue;
+            var list = UsableRegistry.Items;
+            for (int i = 0; i < list.Count; i++)
+            {
+                IUsable u = list[i];
+                if (u == null || !u.CanUse) continue;
+                Vector3 d = u.FocusPoint - eye;
+                float sq = d.sqrMagnitude;
+                float range = u.UseRange;
+                if (sq > range * range) continue;
+                float dist = Mathf.Sqrt(sq);
+                float facing = dist > 1e-3f ? Vector3.Dot(fwd, d) / dist : 1f;
+                if (dist > 1.1f && facing < 0.55f) continue; // roughly in view unless very close
+                float score = dist * (2f - facing);
+                if (score >= bestScore) continue;
+                best = u;
                 bestScore = score;
             }
             return best;
