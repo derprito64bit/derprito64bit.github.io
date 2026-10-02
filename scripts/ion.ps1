@@ -150,7 +150,7 @@ function Enter-UnitySlots([string]$Purpose, [switch]$All) {
                         continue
                     }
                     $held[$path] = $fs
-                    [IO.File]::WriteAllText("$path.holder", $holder, $utf8)
+                    try { [IO.File]::WriteAllText("$path.holder", $holder, $utf8) } catch { }   # a waiter may be reading it
                 }
                 if ($busy.Count -eq 0) { $got = @($held.Values) }
             }
@@ -164,7 +164,7 @@ function Enter-UnitySlots([string]$Purpose, [switch]$All) {
                     foreach ($path in $slots) {
                         $fs = Open-Lock $path
                         if ($fs) {
-                            [IO.File]::WriteAllText("$path.holder", $holder, $utf8)
+                            try { [IO.File]::WriteAllText("$path.holder", $holder, $utf8) } catch { }   # a waiter may be reading it
                             $got = @($fs)
                             break
                         }

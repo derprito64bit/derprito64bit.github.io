@@ -1,7 +1,8 @@
 # Fork notes: derprito64bit.github.io
 
 This repository is derprito64bit's personal-portfolio fork of the collaboration repo
-[`Vasiniks/project.ion`](https://github.com/Vasiniks/project.ion). It is published as the user site
+[`Lets-be-strategic-here/project.ion`](https://github.com/Lets-be-strategic-here/project.ion) (created by
+Vasiniks as `Vasiniks/project.ion`, transferred in October 2026). It is published as the user site
 https://derprito64bit.github.io/. This file covers the fork itself. Engine facts are in [`BUILD.md`](BUILD.md),
 and the binding art and code contract is in [`art-bible.md`](art-bible.md).
 
@@ -10,7 +11,7 @@ and the binding art and code contract is in [`art-bible.md`](art-bible.md).
 | Remote | Repository | Use |
 |---|---|---|
 | `origin` | `derprito64bit/derprito64bit.github.io` | Push all work here. |
-| `upstream` | `Vasiniks/project.ion` | Fetch only. Never push to `upstream/main`. |
+| `upstream` | `Lets-be-strategic-here/project.ion` | Fetch only. Never push to `upstream/main`. |
 
 ## Branches
 

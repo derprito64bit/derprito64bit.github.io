@@ -59,7 +59,7 @@ namespace Ion.Tests.PlayMode
             RoomContext gallery = Room(PortfolioRegistrar.GalleryKey);
             var room = (GrandGallery)gallery.Room;
             Assert.IsNotNull(room.Arcade, "the cabinet has a usable");
-            StringAssert.StartsWith("../", room.Arcade.Url, "demos are site pages next to /play/");
+            StringAssert.StartsWith("../", room.Arcade.Url, "demos are site pages next to /manor/");
             Game.GoToRoom(gallery.Index);
             yield return Seconds(0.3f);
             Player.Teleport(gallery.World(GrandGallery.ArcadeBase + new Vector3(0f, 0f, -1.6f)), gallery.WorldYaw(0f));
