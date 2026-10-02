@@ -1,0 +1,23 @@
+# Approved fork edits to upstream-owned files, read by ownership-check.ps1.
+# One glob per line, then '# reason' (required). A reason starting with 'seam' marks a file changed by a merged
+# up/* branch. A .meta file follows its file. Only the orchestrator edits this list; crews file a type:request.
+
+# Fork links (docs/FORK.md "Site and links"): keep the fork side on upstream merges.
+README.md                                    # fork link: portfolio intro and Play link
+Assets/WebGLTemplates/Ion/index.html         # fork link: both "View projects" links
+Assets/Scripts/Presentation/EndCard.cs       # fork link: ProjectsUrl
+
+# Editor automation (d23bfc5): MCP for Unity package, fork only.
+Packages/manifest.json                       # fork tooling: com.coplaydev.unity-mcp
+Packages/packages-lock.json                  # fork tooling: lock entry for com.coplaydev.unity-mcp
+
+# Merged seams. Each file equals its up/* branch; change them only on that branch.
+Assets/Scripts/Levels/GameBootstrap.cs       # seam up/zone-catalog
+Assets/Scripts/Levels/ZoneCatalog.cs         # seam up/zone-catalog
+Assets/Tests/PlayMode/ZoneCatalogTests.cs    # seam up/zone-catalog
+Assets/Scripts/DebugTools/IonDebug.cs        # seam up/automation-bridge
+Assets/Scripts/Gameplay/Interaction/**       # seam up/usables
+Assets/Scripts/Gameplay/PlayerInteractor.cs  # seam up/usables
+Assets/Tests/PlayMode/UsableTests.cs         # seam up/usables
+scripts/ion.ps1                              # seam up/windows-runner (generic runner; fork slot changes stay generic)
+docs/BUILD.md                                # seam up/windows-runner
