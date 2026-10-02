@@ -34,11 +34,19 @@ UNITY AND SHARED TOOLS
   - Never run a WebGL `build` or `build-dev` in a crew; builds happen at integration.
   - Never open the Unity editor. Never touch another agent's worktree.
 - **Use every tool that makes the work better.** The owner wants agents empowered, not restricted.
+- **Context7:** if ToolSearch doesn't find the `context7` MCP, use its REST API.
+  - PowerShell:
+    - `$k = (Get-Content $env:LOCALAPPDATA\ion\context7.key).Trim()`;
+    - `curl.exe -s -H "Authorization: Bearer $k" "https://context7.com/api/v2/libs/search?libraryName=<lib>&query=<q>"`;
+    - then `.../api/v2/context?libraryId=<id>&query=<q>&type=txt`.
+  - **Never print, echo or commit the key**, and never run `claude mcp get context7`.
+- **Read agent docs with the Read tool** (UTF-8). PowerShell 5.1 `Get-Content` without `-Encoding UTF8` garbles them.
 - **Shared instances go through lanes.** The Blender, Playwright, Chrome DevTools and Unity MCP servers each drive ONE
   app instance shared by every agent, so claim before you use and release after:
   - `powershell -File scripts/fork/lane.ps1 acquire <blender|playwright|devtools|unity-mcp> -Agent <id>`;
   - `renew` at least every 20 minutes during long work;
-  - `release` when done;
+  - `release` when done. `acquire` waits while the lane is busy, so run it with `run_in_background`, or pass
+    `-TimeoutMinutes 1` and retry;
   - `status` shows who holds what.
   - Prefer lane-free tools when they do the job: the `TourShots` PlayMode test, or `playwright-cli` with your own
     session (`-s=<id>`).
@@ -66,18 +74,23 @@ FACTS
   visible text. Never use an AI-generated image.
 
 BRANCH PROTOCOL (your issue gives `<id>`)
-- Start:
-  - run `git fetch origin`;
-  - if `origin/crew/<id>` exists, run `git reset --hard origin/crew/<id>`, or else `crew/<id>` if only that exists;
-  - otherwise stay on the `overhaul` base.
+- Start. Fresh harness worktrees begin on `origin/main`, NOT on overhaul.
+  - `git fetch origin`.
+  - If `origin/crew/<id>` exists: `git checkout -B crew/<id> origin/crew/<id>`. Otherwise:
+    `git checkout -B crew/<id> origin/overhaul`.
+  - Warm Unity before your first run:
+    `powershell -File scripts/ion.ps1 seed-library -Target <your worktree root>` (about 45 s). The first filtered
+    test then takes about 1 min.
 - Work: commit small, then push with `git push origin HEAD:refs/heads/crew/<id>`.
   - Never force-push. Never push to `main`, `overhaul` or `up/*`. No Git LFS.
-- Before every push: `powershell -File scripts/fork/ownership-check.ps1 -Base overhaul -Owned '<glob>','<glob>'`. It
-  must exit 0. Seams crew: add `-Seam` and use `-Base upstream/main`.
+- Before every push, run `git fetch origin`, then
+  `powershell -File scripts/fork/ownership-check.ps1 -Base origin/overhaul -Owned '<glob>','<glob>'`. It must exit 0.
+  Seams crew: add `-Seam` and use `-Base upstream/main`.
 - Use the GitHub issue as your work log. Open a draft PR at your first commit. Post a checkpoint comment (done, next,
   blockers, SHA, gate command) at most every 15 minutes.
 - Need something outside your globs, or found a bug there? File an issue request (`type:request` or `type:bug`,
   `needs:<role>`, `from:<role>`) and keep going. Never cross-edit.
-- End: commit, `git branch -f crew/<id> HEAD`, push, and post the final checkpoint.
+- End: commit, `git branch -f crew/<id> HEAD`, push, and post the final checkpoint. Then delete your worktree's
+  `Library` folder (about 2.2 GB) and close any `playwright-cli` session you opened.
 - Every commit message ends with a blank line, then
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`. Use your own model's name if it differs.

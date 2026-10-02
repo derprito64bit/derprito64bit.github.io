@@ -54,7 +54,7 @@ Gate: `<exact command to rerun>` -> <result>
 - **Iterate:** `powershell -File scripts/ion.ps1 test-play -Filter <YourTests>` (or `test-edit`), with
   `run_in_background`. Poll `Build/logs/<step>.log`; results land in `Build/results-<platform>.xml`.
 - **Before review:** run `powershell -File scripts/ion.ps1 test` once and paste its passed/failed summary lines.
-- **Ownership:** `powershell -File scripts/fork/ownership-check.ps1 -Base overhaul -Owned '<glob>','<glob>'` with your
+- **Ownership:** after `git fetch origin`, `powershell -File scripts/fork/ownership-check.ps1 -Base origin/overhaul -Owned '<glob>','<glob>'` with your
   issue's globs (Seams crew: `-Seam -Base upstream/main`). It must print `PASS` and exit 0.
   - Exception rows come from `scripts/fork/ownership-exceptions.txt`. Only the orchestrator edits that file.
 - **Evidence:** `TourShots` PNGs and the per-zone batch and triangle JSON, at the PR head SHA.
