@@ -7,6 +7,16 @@ from the repo root (which is also the Unity project root).
 UNITY=/Applications/Unity/Hub/Editor/6000.3.25f1/Unity.app/Contents/MacOS/Unity
 ```
 
+On **Windows**, `scripts/ion.ps1` wraps every command below (it finds the pinned editor, waits for
+Unity correctly, prints test totals and exits non-zero on failure):
+
+```powershell
+powershell -File scripts/ion.ps1 setup -Twice   # first setup; later runs: setup
+powershell -File scripts/ion.ps1 test           # EditMode + PlayMode (or test-edit / test-play, -Filter <name>)
+powershell -File scripts/ion.ps1 build          # Web build to Build/Web (build-dev for a development build)
+powershell -File scripts/ion.ps1 serve          # http://localhost:8080/
+```
+
 Only one Unity process may have the project open at a time. Close the editor before running
 batch-mode commands; each command is its own invocation.
 
