@@ -21,7 +21,9 @@ namespace Ion.Levels
     /// ±Z, so a photo's 250 m view cone never reaches the neighbouring zones on X. Dioramas sit at
     /// (i·DioramaSpacing, DioramaY, 0) and are deactivated once captured.
     ///
-    /// Zones: 0 T1 Ledge, 1 T2 Darkroom, 2 Hub (light table), 3 Stairs wing, 4 Camera wing, 5 Gallery.
+    /// Zones: 0 T1 Ledge, 1 T2 Darkroom, 2 Hub (light table), 3 Stairs wing, 4 Camera wing, 5 Gallery, then any
+    /// zones registered through <see cref="ZoneCatalog"/>. The player starts in <see cref="StartZone"/> (T1 unless
+    /// <see cref="ZoneCatalog.StartKey"/> names another zone).
     /// </summary>
     [DefaultExecutionOrder(-1000)]
     public sealed class GameBootstrap : MonoBehaviour
@@ -57,6 +59,9 @@ namespace Ion.Levels
 
         /// <summary>True once every diorama photo is captured and the dioramas are hidden.</summary>
         public bool PhotosReady => _photosReady;
+
+        /// <summary>The zone the player starts in and returns to on "Play again" (<see cref="ZoneCatalog.StartKey"/>).</summary>
+        public int StartZone { get; private set; }
 
         /// <summary>Camera height above the feet; diorama shots are taken from this height (art bible §7.5.1).</summary>
         public float EyeHeight => PlayerFactory.EyeHeight;
@@ -115,7 +120,10 @@ namespace Ion.Levels
             _rooms.Add(new StairsWing());
             _rooms.Add(new CameraWing());
             _rooms.Add(new GalleryEnding());
+            // Extension zones (ZoneCatalog) follow the core zones on the X line.
+            _rooms.AddRange(ZoneCatalog.CreateExtensions(_rooms));
             BuildRooms();
+            StartZone = ResolveStartZone();
 
             // The rewind system's zone hooks (Lead D): which zone a point is in, and where its void starts.
             ZoneInfo.ZoneOfProvider = ZoneAt;
@@ -132,15 +140,15 @@ namespace Ion.Levels
             if (Ion.Presentation.Quality.UltraFx.Instance == null)
                 new GameObject("Ion UltraFx").AddComponent<Ion.Presentation.Quality.UltraFx>();
 
-            // 5. Player at T1.
-            _currentRoom = 0;
-            Pose spawn = _contexts[0].Spawn;
+            // 5. Player at the start zone (T1 unless ZoneCatalog.StartKey says otherwise).
+            _currentRoom = StartZone;
+            Pose spawn = _contexts[StartZone].Spawn;
             _player = PlayerFactory.Create(spawn.position, spawn.rotation.eulerAngles.y);
             _player.SetCheckpoint(spawn.position, spawn.rotation.eulerAngles.y);
             _player.KillY = ResetY; // last resort (the SafePoseTracker recovers falls long before this)
-            _history = WorldHistory.Instance; // created on demand; the first checkpoint is the T1 spawn
+            _history = WorldHistory.Instance; // created on demand; the first checkpoint is the start spawn
             if (_history != null) _history.CheckpointRestored += OnCheckpointRestored;
-            Atmosphere.ApplyMood(_rooms[0].Mood);
+            Atmosphere.ApplyMood(_rooms[StartZone].Mood);
 
             // 6. Photos (next frame, zone by zone) + HUD binding.
             StartCoroutine(CaptureDioramas());
@@ -261,6 +269,16 @@ namespace Ion.Levels
         }
 
         // ------------------------------------------------------------------ zones
+
+        int ResolveStartZone()
+        {
+            string key = ZoneCatalog.StartKey;
+            if (string.IsNullOrEmpty(key)) return 0;
+            int index = IndexOfKey(key);
+            if (index >= 0) return index;
+            Debug.LogWarning("[GameBootstrap] Start zone '" + key + "' does not exist; starting in T1.");
+            return 0;
+        }
 
         /// <summary>Index of the first zone of type <typeparamref name="T"/>, or -1.</summary>
         public int IndexOf<T>() where T : Room
@@ -421,13 +439,13 @@ namespace Ion.Levels
 
                 _player.InputEnabled = true;
                 if (Hud.Instance != null) Hud.Instance.ClearToast();
-                GoToRoom(0);
+                GoToRoom(StartZone);
                 if (history != null)
                 {
                     history.ClearAll();
-                    Pose spawn = _contexts[0].Spawn;
-                    history.SetCheckpoint("zone." + _rooms[0].Key,
-                                          new PlayerPose(spawn.position, spawn.rotation.eulerAngles.y, 0f, 0));
+                    Pose spawn = _contexts[StartZone].Spawn;
+                    history.SetCheckpoint("zone." + _rooms[StartZone].Key,
+                                          new PlayerPose(spawn.position, spawn.rotation.eulerAngles.y, 0f, StartZone));
                 }
             }
             finally
