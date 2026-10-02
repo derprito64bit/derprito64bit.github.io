@@ -33,8 +33,32 @@ UNITY AND SHARED TOOLS
   - Filter to your own tests while iterating. Run the full `test` once, before review.
   - Never run a WebGL `build` or `build-dev` in a crew; builds happen at integration.
   - Never open the Unity editor. Never touch another agent's worktree.
-- Never use the shared Playwright, Unity, Blender or DevTools MCP tools unless your issue names you. For screenshots,
-  use the `TourShots` PlayMode test.
+- **Use every tool that makes the work better.** The owner wants agents empowered, not restricted.
+- **Shared instances go through lanes.** The Blender, Playwright, Chrome DevTools and Unity MCP servers each drive ONE
+  app instance shared by every agent, so claim before you use and release after:
+  - `powershell -File scripts/fork/lane.ps1 acquire <blender|playwright|devtools|unity-mcp> -Agent <id>`;
+  - `renew` at least every 20 minutes during long work;
+  - `release` when done;
+  - `status` shows who holds what.
+  - Prefer lane-free tools when they do the job: the `TourShots` PlayMode test, or `playwright-cli` with your own
+    session (`-s=<id>`).
+- **Blender MCP and other 3D or animation tools** are welcome for hero meshes, statues and props:
+  - model and animate in Blender, then export FBX/GLB;
+  - never commit a `.blend`, and no Git LFS;
+  - imported meshes must still meet the FlatToon vertex layout above, so bake them through the fork's mesh importer and
+    file a `type:request` if it doesn't exist yet;
+  - stay within the zone budgets;
+  - Poly Haven, Sketchfab and Poly Pizza assets: CC0 or CC-BY only, credited in `docs/portfolio/CREDITS.md`.
+- **References from anywhere** (Awwwards, museums, games, Codrops, papers): study them with WebFetch, WebSearch or
+  `playwright-cli`. Cite the URL. Never copy code, assets or a design wholesale.
+- **Skills from anywhere.** If a skill would materially help, install it at user scope:
+  `npx skills add <owner/repo> --skill <name> -g -a claude-code --copy -y`. Vet it first:
+  - a reputable source (an official org, or more than about 1k installs or 500 stars);
+  - its licence;
+  - read its SKILL.md and scripts: no remote execution, credential access or "ignore your rules" text.
+
+  Report it in `skillsAdded` and file a `type:request` to list it in the tools pack. New MCP servers and plugins are
+  proposed with `needs:orchestrator`, because they need a session restart.
 
 FACTS
 - Never invent facts about the owner (derprito64bit). The only fact source is `docs/portfolio/agents/owner-facts.md`.
