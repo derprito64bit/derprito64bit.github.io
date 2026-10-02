@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>derprito64bit · portfolio</title>
+  <meta name="description" content="Portfolio of derprito64bit: a candlelit manor and grand gallery of projects you can walk through in the browser, built around the photo-projection game [project]ion.">
+  <meta name="theme-color" content="#140E10">
+  <link rel="canonical" href="https://derprito64bit.github.io/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://derprito64bit.github.io/">
+  <meta property="og:title" content="derprito64bit · portfolio">
+  <meta property="og:description" content="Walk a candlelit gallery of projects, or play the photo-projection game it is built around.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='4' width='20' height='24' rx='2' fill='%237A1F2B' stroke='%23C59A45' stroke-width='2'/%3E%3Cpath d='M16 9c2 3 2 5 0 7-2-2-2-4 0-7z' fill='%23FFD9A0'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --night: #140E10;
+      --velvet: #2A1418;
+      --wine: #7A1F2B;
+      --brass: #C59A45;
+      --candle: #FFD9A0;
+      --parchment: #EFE3CF;
+      --muted: #BFAE98;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 40px 16px;
+      color: var(--parchment);
+      background:
+        radial-gradient(60vmax 45vmax at 50% 18%, rgba(255, 190, 110, 0.16), transparent 60%),
+        radial-gradient(40vmax 30vmax at 50% 100%, rgba(122, 31, 43, 0.35), transparent 70%),
+        var(--night);
+      font: 17px/1.6 Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+    }
+    main { width: 100%; max-width: 680px; text-align: center; }
+    .eyebrow {
+      margin: 0 0 14px;
+      font: 600 12px/1 "Segoe UI", system-ui, sans-serif;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--brass);
+    }
+    h1 {
+      margin: 0 0 18px;
+      font-size: clamp(36px, 8vw, 64px);
+      font-weight: 400;
+      line-height: 1.05;
+      overflow-wrap: anywhere;
+      text-shadow: 0 0 28px rgba(255, 200, 120, 0.25);
+    }
+    .br { color: var(--brass); }
+    .lede { margin: 0 auto 32px; max-width: 46ch; font-size: 19px; color: var(--muted); }
+    .card {
+      position: relative;
+      padding: 30px 26px 24px;
+      border: 1px solid rgba(197, 154, 69, 0.55);
+      border-radius: 4px;
+      background: linear-gradient(180deg, rgba(122, 31, 43, 0.55), rgba(42, 20, 24, 0.9));
+      box-shadow: 0 0 0 6px rgba(197, 154, 69, 0.08), 0 24px 60px rgba(0, 0, 0, 0.55);
+    }
+    .flame {
+      width: 14px; height: 24px; margin: -48px auto 18px;
+      background: radial-gradient(ellipse at 50% 70%, #FFF3D6 0%, var(--candle) 35%, #FF9A3C 70%, transparent 72%);
+      border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+      filter: drop-shadow(0 0 12px rgba(255, 180, 90, 0.9));
+      animation: flicker 2.6s infinite ease-in-out;
+    }
+    @keyframes flicker {
+      0%, 100% { transform: scale(1) rotate(-1deg); opacity: 0.95; }
+      40% { transform: scale(1.06, 0.96) rotate(2deg); opacity: 1; }
+      70% { transform: scale(0.96, 1.04) rotate(-2deg); opacity: 0.9; }
+    }
+    @media (prefers-reduced-motion: reduce) { .flame { animation: none; } }
+    .card h2 { margin: 0 0 8px; font-size: 26px; font-weight: 400; }
+    .card p { margin: 0 auto 22px; max-width: 44ch; color: var(--muted); }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .btn {
+      display: inline-block;
+      padding: 12px 20px;
+      border: 1px solid var(--brass);
+      border-radius: 3px;
+      color: var(--parchment);
+      font: 600 15px/1.2 "Segoe UI", system-ui, sans-serif;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      background: rgba(20, 14, 16, 0.4);
+    }
+    .btn.primary { background: var(--brass); color: var(--night); }
+    .btn:hover, .btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(255, 217, 160, 0.45); }
+    .skip { display: inline-block; margin-top: 16px; color: var(--candle); font-size: 15px; }
+    .note { margin: 14px 0 0; font: 13px/1.5 "Segoe UI", system-ui, sans-serif; color: var(--muted); }
+    ul { list-style: none; padding: 0; margin: 30px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 24px; }
+    a { color: var(--candle); }
+    footer { margin-top: 30px; font: 13px/1.5 "Segoe UI", system-ui, sans-serif; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">portfolio</p>
+    <h1><span class="br">[</span>derprito64bit<span class="br">]</span></h1>
+    <p class="lede">Welcome to the Manor: a candlelit gallery of my projects that you can walk through, built around a game where photographs become real space.</p>
+
+    <section class="card" aria-labelledby="enter-title">
+      <div class="flame" aria-hidden="true"></div>
+      <h2 id="enter-title">Enter the Manor</h2>
+      <p>Go straight to every project in the Grand Gallery, or start in the foyer and choose between the gallery and the game.</p>
+      <div class="actions">
+        <a class="btn primary" href="play/?zone=gallery">[ Enter the Grand Gallery ]</a>
+        <a class="btn" href="play/">[ Start in the foyer ]</a>
+      </div>
+      <a class="skip" href="play/?zone=game">or skip straight to the photo puzzles</a>
+      <p class="note">Best on a desktop browser with keyboard and mouse · about 18 MB download.</p>
+    </section>
+
+    <ul>
+      <li><a href="https://github.com/derprito64bit">GitHub</a></li>
+      <li><a href="https://github.com/Vasiniks/project.ion">[project]ion source</a></li>
+    </ul>
+
+    <footer>[project]ion is a collaboration with <a href="https://github.com/Vasiniks">Vasiniks</a>.</footer>
+  </main>
+</body>
+</html>

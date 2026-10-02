@@ -158,6 +158,12 @@ namespace Ion.Portfolio
         /// <summary>The paintings in catalogue order (left wall front to back, then the right wall).</summary>
         public readonly List<GameObject> Paintings = new List<GameObject>();
 
+        /// <summary>The arcade cabinet's usable (E: play the demo).</summary>
+        public ArcadeMachine Arcade { get; private set; }
+
+        /// <summary>The demo played when no project has one (site path, see ProjectEntry.demo).</summary>
+        public const string DefaultDemo = "arcade/demo/";
+
         public override void Build(Transform root, RoomContext ctx)
         {
             ManorHall.Build(root, HalfX, Z0, Z1);
@@ -202,10 +208,21 @@ namespace Ion.Portfolio
                 PropKit.Bench(root, new Vector3(2.5f, 0f, z), Dir.PosX, 2f);
             }
 
-            // The far end: the arcade alcove between the two doors.
+            // The far end: the arcade alcove between the two doors. The cabinet plays the first project demo.
             ManorKit.ArcadeCabinet(root, ArcadeBase, Dir.NegZ);
             PropKit.Plaque(root, new Vector3(0f, 3.75f, Z1), Dir.NegZ, "[ ARCADE ]");
-            ctx.Hint(new Vector3(0f, 0f, 40.5f), 1.75f, "The arcade: playable project demos will run on this cabinet.", 5f);
+            ProjectEntry demoProject = null;
+            foreach (ProjectEntry p in projects)
+                if (p != null && !string.IsNullOrEmpty(p.demo)) { demoProject = p; break; }
+            var arcade = new GameObject("Arcade machine");
+            arcade.transform.SetParent(root, false);
+            arcade.transform.localPosition = ArcadeBase + new Vector3(0f, 1.28f, -0.3f);   // the screen
+            Arcade = arcade.AddComponent<ArcadeMachine>();
+            Arcade.UsePrompt = "play";
+            Arcade.UseRange = 2.25f;
+            Arcade.Url = "../" + (demoProject != null ? demoProject.demo : DefaultDemo);
+            Arcade.Title = demoProject != null ? demoProject.title : "Royal Breaker";
+            ctx.Hint(new Vector3(0f, 0f, 40.5f), 1.75f, "The arcade: press E at the cabinet to play.", 5f);
             ManorHall.Door(root, ctx, FoyerPad, Z1, "[ FOYER ]", ManorHall.GoTo(ctx, PortfolioRegistrar.FoyerKey), Mat.TextileRed);
             ManorHall.Door(root, ctx, GamePad, Z1, "[ PLAY THE GAME ]", ManorHall.GoTo(ctx, "t1"), Mat.Graphite);
 

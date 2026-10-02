@@ -20,23 +20,26 @@ namespace Ion.Portfolio
             {
                 if (!s_made)
                 {
-                    s_candlelight = ZoneMood.Make("Candlelight", "#1A1216", "#3A2620", "#FFB46A", "#3E2732",
-                                                  new Vector3(0.22f, 0.92f, -0.30f), 0.82f, 0.024f, 12f);
-                    s_candlelight.ShadeValue = 0.4f;
-                    s_candlelight.AmbientSky = Dim(s_candlelight.AmbientSky, 0.62f);
-                    s_candlelight.AmbientEquator = Dim(s_candlelight.AmbientEquator, 0.66f);
-                    s_candlelight.AmbientGround = Dim(s_candlelight.AmbientGround, 0.6f);
+                    s_candlelight = ZoneMood.Make("Candlelight", "#120C10", "#2A1A18", "#FFAE5E", "#2E1E28",
+                                                  new Vector3(0.22f, 0.92f, -0.30f), 0.56f, 0.03f, 9f);
+                    s_candlelight.ShadeValue = 0.32f;
+                    s_candlelight.AmbientSky = Dim(s_candlelight.AmbientSky, 0.42f);
+                    s_candlelight.AmbientEquator = Dim(s_candlelight.AmbientEquator, 0.48f);
+                    s_candlelight.AmbientGround = Dim(s_candlelight.AmbientGround, 0.4f);
                     s_made = true;
                 }
                 return s_candlelight;
             }
         }
 
-        /// <summary>Marble checker floors, smooth plaster walls, walnut trims and beams, red panels, brass metal.</summary>
+        /// <summary>
+        /// Marble checker floors, royal-blue wallpaper (Cyanotype with a quiet lattice), walnut trims and beams, red
+        /// panels, brass metal. Deep walls make the candles, gilt frames and the red carpet glow.
+        /// </summary>
         public static ArchStyle Style => new ArchStyle
         {
             Floor = new Surf(Mat.Limestone, Pat.Checker),
-            Wall = new Surf(Mat.Plaster, Pat.Ashlar),
+            Wall = new Surf(Mat.Cyanotype, Pat.Lattice),
             Trim = new Surf(Mat.Walnut, Pat.Boards),
             Base = new Surf(Mat.Concrete, Pat.Courses),
             Accent = new Surf(Mat.TextileRed, Pat.None),

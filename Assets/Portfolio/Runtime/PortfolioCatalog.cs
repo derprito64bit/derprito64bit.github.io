@@ -18,6 +18,11 @@ namespace Ion.Portfolio
         public string accent;
         /// <summary>Optional Resources path of the cover image (4:3), e.g. "Portfolio/covers/my-project".</summary>
         public string cover;
+        /// <summary>
+        /// Optional site path of a lightweight HTML5 demo (e.g. "arcade/my-game/"); the Grand Gallery's arcade
+        /// cabinet plays the first project that has one.
+        /// </summary>
+        public string demo;
 
         public Color AccentColor =>
             ColorUtility.TryParseHtmlString(string.IsNullOrEmpty(accent) ? "#6B1E2A" : accent, out Color c) ? c : new Color(0.42f, 0.12f, 0.16f);

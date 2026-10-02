@@ -53,6 +53,23 @@ namespace Ion.Tests.PlayMode
             Assert.AreEqual(Game.IndexOfKey(PortfolioRegistrar.FoyerKey), Game.CurrentRoom, "the far door leads home");
         }
 
+        [UnityTest]
+        public IEnumerator Arcade_CabinetIsPlayableWithE()
+        {
+            RoomContext gallery = Room(PortfolioRegistrar.GalleryKey);
+            var room = (GrandGallery)gallery.Room;
+            Assert.IsNotNull(room.Arcade, "the cabinet has a usable");
+            StringAssert.StartsWith("../", room.Arcade.Url, "demos are site pages next to /play/");
+            Game.GoToRoom(gallery.Index);
+            yield return Seconds(0.3f);
+            Player.Teleport(gallery.World(GrandGallery.ArcadeBase + new Vector3(0f, 0f, -1.6f)), gallery.WorldYaw(0f));
+            yield return Seconds(0.2f);
+            var interactor = Player.GetComponent<Ion.Gameplay.PlayerInteractor>();
+            Assert.AreSame(room.Arcade, interactor.FocusedUsable, "standing at the cabinet focuses it");
+            Assert.IsTrue(interactor.UseFocused());
+            Assert.AreEqual(1, room.Arcade.Plays);
+        }
+
         [Test]
         public void Catalogue_ParsesAndStaysWithinTheGallery()
         {
