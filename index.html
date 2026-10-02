@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>derprito64bit · portfolio</title>
+  <meta name="description" content="Portfolio of derprito64bit, built around [project]ion: a first-person photo-projection puzzle you can play in the browser.">
+  <meta name="theme-color" content="#EFEBE3">
+  <link rel="canonical" href="https://derprito64bit.github.io/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://derprito64bit.github.io/">
+  <meta property="og:title" content="derprito64bit · portfolio">
+  <meta property="og:description" content="A walk-through portfolio in progress. Play [project]ion, the photo-projection puzzle it is built on.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='3' width='22' height='26' rx='2' fill='%23EFEBE3' stroke='%23383D47' stroke-width='1.5'/%3E%3Crect x='8' y='6' width='16' height='14' fill='%239FE3FF'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --paper: #EFEBE3;
+      --plaster: #E4DDD0;
+      --graphite: #383D47;
+      --muted: #5E6470;
+      --ion: #9FE3FF;
+      --ion-ink: #1F6F93;
+      --brass: #C59A45;
+      --grid: rgba(56, 61, 71, 0.07);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #23262C;
+        --plaster: #2C3038;
+        --graphite: #EFEBE3;
+        --muted: #B9BCC4;
+        --ion-ink: #9FE3FF;
+        --grid: rgba(239, 235, 227, 0.06);
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 32px 16px;
+      background-color: var(--paper);
+      background-image:
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 48px 48px;
+      color: var(--graphite);
+      font: 17px/1.55 "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+    main { width: 100%; max-width: 640px; }
+    .eyebrow {
+      margin: 0 0 12px;
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(34px, 8vw, 58px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      overflow-wrap: anywhere;
+    }
+    .br { color: var(--brass); font-weight: 400; }
+    .lede { margin: 0 0 28px; font-size: 19px; color: var(--muted); max-width: 52ch; }
+    .card {
+      background: var(--plaster);
+      border: 1px solid var(--grid);
+      border-radius: 10px;
+      padding: 22px 22px 18px;
+      box-shadow: 0 10px 30px rgba(56, 61, 71, 0.12);
+    }
+    .card h2 { margin: 0 0 6px; font-size: 22px; }
+    .card p { margin: 0 0 18px; color: var(--muted); }
+    .play {
+      display: inline-block;
+      padding: 12px 22px;
+      border-radius: 8px;
+      background: var(--graphite);
+      color: var(--paper);
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 0 0 3px var(--ion);
+    }
+    .play:hover, .play:focus-visible { outline: none; box-shadow: 0 0 0 5px var(--ion); }
+    .note { margin: 12px 0 0; font-size: 14px; color: var(--muted); }
+    ul { list-style: none; padding: 0; margin: 28px 0 0; display: flex; flex-wrap: wrap; gap: 10px 22px; }
+    a { color: var(--ion-ink); }
+    footer { margin-top: 36px; font-size: 13px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">portfolio · in progress</p>
+    <h1><span class="br">[</span>derprito64bit<span class="br">]</span></h1>
+    <p class="lede">A portfolio you walk through is on its way: every project will get its own room inside the game below. Until the project wings open, the game itself is playable now.</p>
+
+    <section class="card" aria-labelledby="game-title">
+      <h2 id="game-title">[project]ion</h2>
+      <p>A first-person puzzle where photographs become real, walkable space. Hold up a photo, line it up and place it.</p>
+      <a class="play" href="play/">[ Play [project]ion ]</a>
+      <p class="note">Best on a desktop browser with keyboard and mouse · about 18 MB download.</p>
+    </section>
+
+    <ul>
+      <li><a href="https://github.com/derprito64bit">GitHub</a></li>
+      <li><a href="https://github.com/Vasiniks/project.ion">[project]ion source</a></li>
+    </ul>
+
+    <footer>[project]ion is a collaboration with <a href="https://github.com/Vasiniks">Vasiniks</a>.</footer>
+  </main>
+</body>
+</html>
