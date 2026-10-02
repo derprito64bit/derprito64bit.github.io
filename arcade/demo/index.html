@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Royal Breaker · arcade demo</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #0E0A0C; color: #EFE3CF; overflow: hidden; }
+    body { display: grid; place-items: center; font: 14px/1.4 Georgia, serif; }
+    canvas { display: block; width: min(100vw, 133.33vh); height: min(75vw, 100vh); image-rendering: pixelated; }
+  </style>
+</head>
+<body>
+  <canvas id="c" width="320" height="240" aria-label="Royal Breaker: a small brick-breaker demo"></canvas>
+  <script>
+  (function () {
+    // Royal Breaker: a tiny brick-breaker that proves the arcade cabinet runs an HTML5 demo.
+    // Controls: mouse or left/right arrows to move, space or click to launch.
+    var c = document.getElementById('c'), g = c.getContext('2d');
+    var W = c.width, H = c.height;
+    var ROWS = ['#7A1F2B', '#9B2C3A', '#C59A45', '#D6A43B', '#3C8C88'];
+    var paddle, ball, bricks, score, lives, state, keys = {};
+
+    function reset(full) {
+      paddle = { x: W / 2 - 24, y: H - 18, w: 48, h: 6 };
+      ball = { x: W / 2, y: H - 26, vx: 0, vy: 0, r: 3, stuck: true };
+      if (full) {
+        score = 0; lives = 3; bricks = [];
+        for (var r = 0; r < ROWS.length; r++)
+          for (var i = 0; i < 10; i++)
+            bricks.push({ x: 12 + i * 30, y: 34 + r * 12, w: 26, h: 8, color: ROWS[r], alive: true });
+        state = 'ready';
+      }
+    }
+
+    function launch() {
+      if (state === 'won' || state === 'over') { reset(true); return; }
+      if (ball.stuck) { ball.stuck = false; ball.vx = 1.6 * (Math.random() < 0.5 ? -1 : 1); ball.vy = -2.4; state = 'play'; }
+    }
+
+    c.addEventListener('mousemove', function (e) {
+      var rect = c.getBoundingClientRect();
+      paddle.x = Math.max(0, Math.min(W - paddle.w, (e.clientX - rect.left) / rect.width * W - paddle.w / 2));
+    });
+    c.addEventListener('click', launch);
+    window.addEventListener('keydown', function (e) {
+      keys[e.key] = true;
+      if (e.key === ' ' || e.key === 'Enter') { launch(); e.preventDefault(); }
+    });
+    window.addEventListener('keyup', function (e) { keys[e.key] = false; });
+
+    function step() {
+      if (keys.ArrowLeft || keys.a) paddle.x = Math.max(0, paddle.x - 4);
+      if (keys.ArrowRight || keys.d) paddle.x = Math.min(W - paddle.w, paddle.x + 4);
+      if (ball.stuck) { ball.x = paddle.x + paddle.w / 2; ball.y = paddle.y - ball.r - 1; return; }
+      ball.x += ball.vx; ball.y += ball.vy;
+      if (ball.x < ball.r || ball.x > W - ball.r) ball.vx = -ball.vx;
+      if (ball.y < 22 + ball.r) ball.vy = Math.abs(ball.vy);
+      if (ball.y > paddle.y - ball.r && ball.y < paddle.y + paddle.h && ball.x > paddle.x && ball.x < paddle.x + paddle.w && ball.vy > 0) {
+        var hit = (ball.x - (paddle.x + paddle.w / 2)) / (paddle.w / 2);
+        ball.vx = hit * 2.6; ball.vy = -Math.max(2.2, Math.abs(ball.vy) * 1.02);
+      }
+      for (var i = 0; i < bricks.length; i++) {
+        var b = bricks[i];
+        if (!b.alive) continue;
+        if (ball.x > b.x && ball.x < b.x + b.w && ball.y > b.y && ball.y < b.y + b.h) {
+          b.alive = false; ball.vy = -ball.vy; score += 10;
+          break;
+        }
+      }
+      if (bricks.every(function (b) { return !b.alive; })) { state = 'won'; ball.stuck = true; }
+      if (ball.y > H + 8) {
+        lives--;
+        if (lives <= 0) { state = 'over'; ball.stuck = true; } else { reset(false); state = 'ready'; }
+      }
+    }
+
+    function draw() {
+      g.fillStyle = '#140E10'; g.fillRect(0, 0, W, H);
+      g.fillStyle = '#2A1418'; g.fillRect(0, 0, W, 20);
+      g.fillStyle = '#C59A45'; g.fillRect(0, 20, W, 1);
+      g.fillStyle = '#EFE3CF'; g.font = '10px Georgia, serif';
+      g.fillText('ROYAL BREAKER', 8, 13);
+      g.textAlign = 'right'; g.fillText('score ' + score + '   lives ' + lives, W - 8, 13); g.textAlign = 'left';
+      bricks.forEach(function (b) { if (b.alive) { g.fillStyle = b.color; g.fillRect(b.x, b.y, b.w, b.h); } });
+      g.fillStyle = '#C59A45'; g.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+      g.fillStyle = '#FFD9A0'; g.beginPath(); g.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2); g.fill();
+      if (state !== 'play') {
+        var msg = state === 'won' ? 'The court applauds. Click to play again.'
+                : state === 'over' ? 'Game over. Click to play again.'
+                : 'Click or press space to launch';
+        g.fillStyle = 'rgba(14,10,12,0.7)'; g.fillRect(0, H / 2 + 6, W, 22);
+        g.fillStyle = '#FFD9A0'; g.textAlign = 'center'; g.fillText(msg, W / 2, H / 2 + 21); g.textAlign = 'left';
+      }
+    }
+
+    function loop() { step(); draw(); requestAnimationFrame(loop); }
+    reset(true);
+    loop();
+    c.focus();
+  })();
+  </script>
+</body>
+</html>
