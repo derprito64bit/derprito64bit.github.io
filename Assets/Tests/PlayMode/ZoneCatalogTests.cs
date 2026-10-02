@@ -48,7 +48,8 @@ namespace Ion.Tests.PlayMode
         public IEnumerator Extension_FollowsCoreZonesAndIsTheStart()
         {
             int index = Game.IndexOfKey(Key);
-            Assert.AreEqual(6, index, "extension zones come after the six core zones");
+            Assert.Greater(index, Game.IndexOfKey("gallery"), "extension zones come after the six core zones");
+            Assert.AreEqual(Game.Rooms.Count - ZoneCatalog.Count, 6, "six core zones, then the extensions");
             Assert.AreEqual(index, Game.StartZone);
             Assert.AreEqual(index, Game.CurrentRoom, "the player starts in the start zone");
             Assert.AreEqual(index, Game.ZoneAt(Player.transform.position), "the spawn lies in the start zone's slot");
