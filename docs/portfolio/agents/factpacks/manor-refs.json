@@ -1,0 +1,227 @@
+{
+ "pack": "manor-refs",
+ "verdict": "fix",
+ "items": [
+  {
+   "topic": "Royal proportions: Versailles Hall of Mirrors",
+   "principle": "Long axis, ceiling height just above width, repeated 17-bay window/mirror rhythm",
+   "numbers": "73 x 10.5 x 12.3 m (7.0:1:1.17); 17 windows + 17 mirrors; bay pitch about 4.3 m (derived); 9 ceiling paintings; 3000+ candles",
+   "palette": [
+    "#C9A24B",
+    "#8E3B34",
+    "#2F5B49",
+    "#F2EEE4"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Hall_of_Mirrors",
+   "licence": "CC BY-SA 4.0 (text; facts only used)"
+  },
+  {
+   "topic": "Royal proportions: Schoenbrunn Great Gallery",
+   "principle": "43 m x about 10 m gallery, two chandeliers, mirror wall opposite windows, white and gold stucco",
+   "numbers": "43 x ~10 m (4.3:1); 2 chandeliers x 72 candles; 868 bulbs after 1898; LED candle replacements 2011/12",
+   "palette": [
+    "#F2EEE4",
+    "#C8A24A"
+   ],
+   "source": "https://www.schoenbrunn.at/en/about-schoenbrunn/the-palace/tour-of-the-palace/great-gallery",
+   "licence": "Facts cited; page copyright Schloss Schoenbrunn"
+  },
+  {
+   "topic": "Royal colour: Wallace Collection Great Gallery",
+   "principle": "Saturated crimson silk field with gilt fillet border; daylight via oculi",
+   "numbers": "no dimensions found",
+   "palette": [
+    "#8B1A2B",
+    "#C9A24B"
+   ],
+   "source": "https://www.countrylife.co.uk/luxury/art-and-antiques/gallery-tour-great-gallery-wallace-collection-62420 (search snippet)",
+   "licence": "Facts cited; page copyright Country Life"
+  },
+  {
+   "topic": "Wainscot/dado height",
+   "principle": "Lower wall treated differently, about 1 m; boiserie in French interiors",
+   "numbers": "about 1 m (3-4 ft)",
+   "palette": [],
+   "source": "https://en.wikipedia.org/wiki/Wainscoting",
+   "licence": "CC BY-SA 4.0"
+  },
+  {
+   "topic": "Monumental display: David in the Accademia Tribune",
+   "principle": "Apse/exedra under a glazed dome, top light, centre-line approach, low plinth",
+   "numbers": "statue 5.17 m; pedestal 1.60 m (secondary source); plinth ratio 0.31; first-view distance 12-16 m (derived)",
+   "palette": [],
+   "source": "https://en.wikipedia.org/wiki/David_(Michelangelo); https://vacatis.com/the-tribune-accademia-gallery (snippet)",
+   "licence": "CC BY-SA 4.0 (text)"
+  },
+  {
+   "topic": "Candlelight in stylised real-time",
+   "principle": "Noise-driven point light plus emissive flame card; warm pools in cool ambient",
+   "numbers": "1850 K candle (#FF9329); flicker +/-12% at 8 Hz; warm area at most 35%; 4-8 active lights (estimates)",
+   "palette": [
+    "#FF9329",
+    "#FFE8B0",
+    "#25376A",
+    "#3E5C8D"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Color_temperature; https://learn.unity.com/tutorial/challenge-1-simulating-candle-lighting-with-point-lights",
+   "licence": "CC BY-SA 4.0; Unity Learn terms"
+  },
+  {
+   "topic": "Starry Night composition",
+   "principle": "Sky 2/3, village 1/3; left cypress; central S-spiral; moon upper right; 11 stars",
+   "numbers": "73.7 x 92.1 cm; horizon about 0.63 of height (measured); moon about x 76-95%, y 5-25% (measured)",
+   "palette": [
+    "#25376A",
+    "#3E5C8D",
+    "#69839B",
+    "#909F98",
+    "#C4CB8E",
+    "#121617"
+   ],
+   "source": "https://en.wikipedia.org/wiki/The_Starry_Night; https://commons.wikimedia.org/wiki/File:Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+   "licence": "Public domain (Commons PD tag; Van Gogh d. 1890)"
+  },
+  {
+   "topic": "Starry Night brushwork",
+   "principle": "Spiral strokes in the sky, long curved strokes on the cypress, short dashes in the village",
+   "numbers": "sky strokes 1-3% of canvas width; cypress strokes 5-8% of height (estimates)",
+   "palette": [
+    "#25376A",
+    "#C4CB8E"
+   ],
+   "source": "https://en.wikipedia.org/wiki/The_Starry_Night; colourlex.com/project/van-gogh-starry-night (snippet)",
+   "licence": "CC BY-SA 4.0 text; painting PD"
+  },
+  {
+   "topic": "Coda: Cafe Terrace at Night (1888)",
+   "principle": "Funnel perspective into a lit terrace; no black; blue/violet/green night vs sulphur-yellow light",
+   "numbers": "80.7 x 65.3 cm; Sept 1888; about 11 pm by Aquarius",
+   "palette": [
+    "#D1C771",
+    "#AC925F",
+    "#416889",
+    "#293231"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Caf%C3%A9_Terrace_at_Night; https://commons.wikimedia.org/wiki/File:Van_Gogh_-_Terrasse_des_Caf%C3%A9s_an_der_Place_du_Forum_in_Arles_am_Abend1.jpeg",
+   "licence": "Public domain"
+  },
+  {
+   "topic": "Coda: Bedroom in Arles (1888)",
+   "principle": "Trapezoid room (obtuse left, acute right corner), flat tints, no shadows",
+   "numbers": "72 x 90 cm (x2), 57.5 x 74 cm; 3 versions",
+   "palette": [
+    "#A8B8D6",
+    "#C59B4D",
+    "#A06646",
+    "#97816B"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Bedroom_in_Arles; https://commons.wikimedia.org/wiki/File:Vincent_van_Gogh_-_De_slaapkamer_-_Google_Art_Project_adjusted.jpg",
+   "licence": "Public domain"
+  },
+  {
+   "topic": "Game ref: Viewfinder",
+   "principle": "Photo overwrites world geometry; store capture pose, FOV, aspect",
+   "numbers": "released 2023-07-18",
+   "palette": [],
+   "source": "https://en.wikipedia.org/wiki/Viewfinder_(video_game)",
+   "licence": "CC BY-SA 4.0 (text)"
+  },
+  {
+   "topic": "Game ref: Superliminal",
+   "principle": "Held object keeps angular size; scale proportional to distance change",
+   "numbers": "scale = d_new / d_old",
+   "palette": [],
+   "source": "https://en.wikipedia.org/wiki/Superliminal_(video_game)",
+   "licence": "CC BY-SA 4.0 (text)"
+  },
+  {
+   "topic": "Game ref: ULTRAKILL Layer 8 Fraud",
+   "principle": "Deliberately breaking a trusted spatial cue (mirrors); technique not documented",
+   "numbers": "none",
+   "palette": [],
+   "source": "https://en.wikipedia.org/wiki/Ultrakill",
+   "licence": "CC BY-SA 4.0 (text)"
+  },
+  {
+   "topic": "Game ref: The Witness",
+   "principle": "Path completes only from one viewpoint; no text instruction",
+   "numbers": "viewpoint tolerance about 0.3 m (estimate)",
+   "palette": [],
+   "source": "https://en.wikipedia.org/wiki/The_Witness_(2016_video_game)",
+   "licence": "CC BY-SA 4.0 (text)"
+  },
+  {
+   "topic": "Game ref: Gorogoa",
+   "principle": "Stacked panels; a hole in one image masks another",
+   "numbers": "2x2 grid, up to 4 images",
+   "palette": [],
+   "source": "https://en.wikipedia.org/wiki/Gorogoa",
+   "licence": "CC BY-SA 4.0 (text)"
+  },
+  {
+   "topic": "Game ref: Return of the Obra Dinn",
+   "principle": "1-bit dither style; answers validate in sets of three",
+   "numbers": "sets of 3",
+   "palette": [
+    "#000000",
+    "#FFFFFF"
+   ],
+   "source": "https://en.wikipedia.org/wiki/Return_of_the_Obra_Dinn",
+   "licence": "CC BY-SA 4.0 (text)"
+  }
+ ],
+ "sources": [
+  "https://en.wikipedia.org/wiki/Hall_of_Mirrors",
+  "https://en.wikipedia.org/wiki/David_(Michelangelo)",
+  "https://en.wikipedia.org/wiki/The_Starry_Night",
+  "https://en.wikipedia.org/wiki/Caf%C3%A9_Terrace_at_Night",
+  "https://en.wikipedia.org/wiki/Bedroom_in_Arles",
+  "https://en.wikipedia.org/wiki/Color_temperature",
+  "https://en.wikipedia.org/wiki/Wainscoting",
+  "https://www.schoenbrunn.at/en/about-schoenbrunn/the-palace/tour-of-the-palace/great-gallery",
+  "https://commons.wikimedia.org/wiki/File:Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
+  "https://vacatis.com/the-tribune-accademia-gallery",
+  "https://www.countrylife.co.uk/luxury/art-and-antiques/gallery-tour-great-gallery-wallace-collection-62420",
+  "https://learn.unity.com/tutorial/challenge-1-simulating-candle-lighting-with-point-lights",
+  "https://en.wikipedia.org/wiki/Viewfinder_(video_game)",
+  "https://en.wikipedia.org/wiki/Superliminal_(video_game)",
+  "https://en.wikipedia.org/wiki/Ultrakill",
+  "https://en.wikipedia.org/wiki/The_Witness_(2016_video_game)",
+  "https://en.wikipedia.org/wiki/Gorogoa",
+  "https://en.wikipedia.org/wiki/Return_of_the_Obra_Dinn"
+ ],
+ "corrections": [
+  {
+   "claim": "Star count: \"Wikipedia says about 11\"; so use 11 stars + moon, which \"satisfies both counts\".",
+   "correction": "Wikipedia's Starry Night article gives 10 stars in an image caption (\"10 stars with swirls, Venus, and a bright yellow crescent Moon\"). \"Eleven\" appears only in Loevgren's symbolist theory about the eleven stars in Joseph's dream, not as a count of the painting. The 10-stars-plus-Venus count is the one the article supports. Eleven stars plus Venus would be 12 bright objects, so it does not match both counts.",
+   "source": "https://en.wikipedia.org/wiki/The_Starry_Night"
+  },
+  {
+   "claim": "Derived [E]: two chandeliers in 43 m give a spacing of about 14 m \"with about 7 m end margins (each at 1/3 and 2/3 of the length)\". Rule of thumb 4 repeats \"every 14 m along a 43 m hall\".",
+   "correction": "The arithmetic is inconsistent. At 1/3 and 2/3 of 43 m the chandeliers sit about 14.3 m from each end and about 14.3 m apart. A 7 m end margin with two chandeliers would give about 29 m between them. Schönbrunn's page gives no chandelier positions. Rule 4 also implies more than two chandeliers (43/14 is about 3), which contradicts the documented two.",
+   "source": "https://www.schoenbrunn.at/en/about-schoenbrunn/the-palace/tour-of-the-palace/great-gallery (gives only 43 m, almost 10 m wide, two chandeliers of 72 candles; no positions)"
+  },
+  {
+   "claim": "Candle techniques [D]: point light with intensity driven by Perlin noise (lerp between min and max), cited to the Unity Learn \"Simulating Candle Lighting with Point Lights\" tutorial.",
+   "correction": "The Unity Learn page exists but only covers adding a point light in the flame and adjusting its colour and intensity. It has no Perlin noise, lerp or flicker content. Treat the Perlin and lerp technique as [E] or re-source it. The gameinspired.substack.com source is not listed in the sources array and I did not check it.",
+   "source": "https://learn.unity.com/tutorial/challenge-1-simulating-candle-lighting-with-point-lights"
+  },
+  {
+   "claim": "David pedestal is 1.60 m [D-weak, Vacatis snippet]; total height about 6.8 m; plinth ratio 0.31.",
+   "correction": "The cited Vacatis page gives no pedestal figure, and the Wikipedia David article gives none either. The 1.60 m is not supported by either listed source. The 6.8 m total, the 0.31 ratio, the 12.6 m viewing distance and rules 7 and 8 all depend on it, so they should be marked [E] or dropped until a real source is found.",
+   "source": "https://vacatis.com/the-tribune-accademia-gallery ; https://en.wikipedia.org/wiki/David_(Michelangelo)"
+  }
+ ],
+ "unsupported": [
+  "Hall of Mirrors \"9 large ceiling paintings\" is correct, but the article says nine large plus numerous smaller ones. Builders should not read nine as the total.",
+  "David \"first view at about 2 to 3 H\": the pack's own 12.6 to 16 m on a 6.8 m total is only about 1.9 to 2.4 H.",
+  "\"Statue = 2 to 4x life size\" has no source; only the David 3x figure is arithmetic.",
+  "Return of the Obra Dinn \"sets of three\": the article adds that the last six fates are validated in sets of two. Rule 15 drops that nuance.",
+  "Wallace Collection crimson silk, gilt fillet and oculi come from search snippets only. The Country Life page returned navigation text, so nothing was verified.",
+  "The Starry Night composition claims (sky two thirds, horizon at 0.63 H, cypress 5 to 28% of width, moon at x 76 to 95%, y 5 to 25%) rest on the pack's own image measurements. I did not open the evidence JPGs or recompute them.",
+  "All palette hex values are median-cut samples tagged [M] and were not re-measured. The colourlex pigment claims were not verified.",
+  "The Café Terrace and Bedroom palettes were not re-measured. The Commons licence and filenames were not re-checked.",
+  "Gorogoa \"2x2 grid, up to 4 images\", The Witness \"tolerance 0.3 m\" and Superliminal were not fetched. The Witness tolerance is an estimate.",
+  "Carpet runner widths, flicker amplitude and rate, the 35% warm-area cap and the 10% gilt cap are all [E] with no source. The pack labels them so, which is acceptable."
+ ]
+}
