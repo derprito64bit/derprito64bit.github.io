@@ -1,8 +1,18 @@
+# derprito64bit · portfolio
+
+The Manor: a candlelit gallery of my projects that you can walk through in the browser.
+
+**Visit:** https://derprito64bit.github.io/ · **Walk in:** [Grand Gallery](https://derprito64bit.github.io/play/?zone=gallery) · [foyer](https://derprito64bit.github.io/play/) · [photo puzzles](https://derprito64bit.github.io/play/?zone=game)
+
+Built on [project]ion, a collaboration with [Vasiniks](https://github.com/Vasiniks). Original repo: https://github.com/Vasiniks/project.ion. Fork notes: [docs/FORK.md](docs/FORK.md).
+
+---
+
 # [project]ion
 
 A low-poly, Viewfinder-inspired photo-projection puzzle, built in Unity 6.3 (URP) for the browser.
 
-**Play:** https://vasiniks.github.io/project.ion/ (desktop browser, keyboard and mouse)
+**Play:** https://derprito64bit.github.io/play/?zone=game (desktop browser, keyboard and mouse)
 
 Hold up a photo, line it up and place it. The world inside the photo's view is cut away, and the scene in the photo becomes real, walkable geometry.
 

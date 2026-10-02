@@ -44,6 +44,16 @@ To rebase a seam branch onto the latest upstream: `git switch up/<seam>; git reb
 - what to incorporate into the fork and what to leave out;
 - what the collaboration repo is missing that the fork could contribute.
 
+## Site and links
+
+- The site is https://derprito64bit.github.io/: `site/` at the root, the Unity Web build at `/play/` (`?zone=gallery`, `?zone=game`), arcade demos at `/arcade/<slug>/`. `scripts/fork/publish.ps1` publishes it to `gh-pages`. Upstream's Pages workflow (`.github/workflows/web.yml`, BUILD.md §5) is not used here.
+- "This site / this repo / play here" links point at the fork. Credits to Vasiniks and the original repo stay.
+- Fork-only link edits in upstream-owned files. Keep the fork side when merging upstream, until a site-config seam replaces them:
+  - `README.md`: the portfolio intro above the original README, and its **Play** link.
+  - `Assets/WebGLTemplates/Ion/index.html`: both "View projects" links.
+  - `Assets/Scripts/Presentation/EndCard.cs`: `ProjectsUrl`.
+- `companyName` stays `vasiniks` (ProjectSetup, ProjectSettings): it names the game's publisher, and changing it moves the editor's PlayerPrefs.
+
 ## Storage policy
 
 - **No Git LFS in this fork.** LFS objects pushed to a fork count against the parent repository owner's quota.

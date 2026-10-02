@@ -21,7 +21,7 @@ namespace Ion.Presentation
     [DefaultExecutionOrder(31000)]
     public sealed class EndCard : MonoBehaviour
     {
-        public const string ProjectsUrl = "https://github.com/Vasiniks";
+        public const string ProjectsUrl = "https://github.com/derprito64bit";
 
         public static EndCard Instance { get; private set; }
 
