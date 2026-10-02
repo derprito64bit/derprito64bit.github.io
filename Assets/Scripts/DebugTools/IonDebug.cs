@@ -44,6 +44,8 @@ namespace Ion.DebugTools
     ///   Quality("-1|0|1|2|3") sets the quality preference (Auto / Low / Med / High / Ultra).
     ///   Spectate("x,y,z,yaw,pitch")  freezes the player and puts the camera at a zone-local pose
     ///                       (screenshots from outside); Spectate("") hands it back.
+    ///   Lock("1|0")         simulates the pointer lock (input on, no pause card) / ends the simulation.
+    ///   Hud("0|1")          hides / shows the screen UI (clean screenshots).
     ///   Place logs "[IonDebug] Place took N ms" (the whole cut + paste, measured around PhotoHolder.Place).
     ///
     /// Availability: always in the Editor (Play mode, PlayMode tests). In a Web player build the harness
@@ -547,6 +549,34 @@ namespace Ion.DebugTools
             Ion.Presentation.QualityTier.Set(tier);
             Log("Quality " + Ion.Presentation.QualityTier.Name(Ion.Presentation.QualityTier.Preference) +
                 " -> tier " + Ion.Presentation.QualityTier.Name(Ion.Presentation.QualityTier.Current));
+        }
+
+        /// <summary>
+        /// Lock("1|0"): simulates the pointer lock (1, default) or ends the simulation (0). With a simulated lock the
+        /// game takes input and the pause card stays away without a real browser lock, which automated browsers
+        /// cannot always obtain (screenshots, smoke tests).
+        /// </summary>
+        public void Lock(string arg)
+        {
+            if ((arg ?? string.Empty).Trim() == "0")
+            {
+                PointerLock.EndSimulation();
+                Log("Lock off");
+            }
+            else
+            {
+                PointerLock.Simulate(true);
+                Log("Lock on (simulated)");
+            }
+        }
+
+        /// <summary>Hud("0|1"): hides (0) or shows (1, default) the screen UI, for clean screenshots.</summary>
+        public void Hud(string arg)
+        {
+            bool show = (arg ?? string.Empty).Trim() != "0";
+            Canvas canvas = Ion.Presentation.UIFactory.Canvas;
+            if (canvas != null) canvas.enabled = show;
+            Log("Hud " + (show ? "on" : "off"));
         }
 
         Transform _spectateCam;
