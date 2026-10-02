@@ -1,6 +1,7 @@
 // The Grand Gallery's arcade overlay: a project demo in an iframe inside an arcade-cabinet bezel.
 // IonArcadeOpen(url, title) shows it (and releases the pointer lock); IonArcadeIsOpen() is polled by C#.
-// Closing: the button, Esc, or a click on the dimmed backdrop. Nothing here may throw (exceptions are off).
+// Closing: the button, Esc (also inside a same-origin demo), a click on the dimmed backdrop, or the demo posting
+// the message 'ion-arcade:close' to its parent. Nothing here may throw (exceptions are off).
 mergeInto(LibraryManager.library, {
   IonArcadeOpen: function (urlPtr, titlePtr) {
     try {
@@ -55,14 +56,24 @@ mergeInto(LibraryManager.library, {
         };
         close.addEventListener('click', shut);
         root.addEventListener('click', function (e) { if (e.target === root) shut(); });
-        window.addEventListener('keydown', function (e) {
+        var onKey = function (e) {
           if (window.__ionArcadeOpen && e.key === 'Escape') { e.preventDefault(); shut(); }
-        }, true);
+        };
+        window.addEventListener('keydown', onKey, true);
+        window.addEventListener('message', function (e) {
+          var f = document.getElementById('ion-arcade-screen');
+          if (window.__ionArcadeOpen && f && e.source === f.contentWindow && e.data === 'ion-arcade:close') shut();
+        });
+        // Keys typed into the demo stay inside the iframe, so Esc is also hooked there (same-origin demos only).
+        frame.onload = function () {
+          if (!window.__ionArcadeOpen) return;
+          try { frame.focus(); } catch (e) {}
+          try { frame.contentWindow.addEventListener('keydown', onKey, true); } catch (e) {}
+        };
       }
       document.getElementById('ion-arcade-title').textContent = title;
       var screen = document.getElementById('ion-arcade-screen');
       screen.src = url;
-      screen.onload = function () { try { screen.focus(); } catch (e) {} };
       root.style.display = 'flex';
       window.__ionArcadeOpen = true;
       if (document.exitPointerLock && document.pointerLockElement) document.exitPointerLock();

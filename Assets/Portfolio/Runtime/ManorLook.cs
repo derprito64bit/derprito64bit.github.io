@@ -33,12 +33,12 @@ namespace Ion.Portfolio
         }
 
         /// <summary>
-        /// Marble checker floors, royal-blue wallpaper (Cyanotype with a quiet lattice), walnut trims and beams, red
+        /// Oak herringbone parquet, royal-blue wallpaper (Cyanotype with a quiet lattice), walnut trims and beams, red
         /// panels, brass metal. Deep walls make the candles, gilt frames and the red carpet glow.
         /// </summary>
         public static ArchStyle Style => new ArchStyle
         {
-            Floor = new Surf(Mat.Limestone, Pat.Checker),
+            Floor = new Surf(Mat.Oak, Pat.Herringbone),
             Wall = new Surf(Mat.Cyanotype, Pat.Lattice),
             Trim = new Surf(Mat.Walnut, Pat.Boards),
             Base = new Surf(Mat.Concrete, Pat.Courses),
