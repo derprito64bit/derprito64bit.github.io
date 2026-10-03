@@ -1,4 +1,4 @@
-# Fleet protocol (fork side)
+# Fleet protocol (Manor repo)
 
 The GitHub repo `derprito64bit/derprito64bit.github.io` is the fleet's durable work log:
 - **Issues are crew briefs:** acceptance criteria, owned globs, the gate and `after[]` dependencies.
@@ -56,7 +56,6 @@ Gate: `<exact command to rerun>` -> <result>
 - **Before review:** run `powershell -File scripts/ion.ps1 test` once and paste its passed/failed summary lines.
 - **Ownership:** after `git fetch origin`, `powershell -File scripts/fork/ownership-check.ps1 -Base origin/main -Owned '<glob>','<glob>'` with your
   issue's globs. It must print `PASS` and exit 0.
-  - Exception rows come from `scripts/fork/ownership-exceptions.txt`. Only the orchestrator edits that file.
 - **Evidence:** `TourShots` PNGs and the per-zone batch and triangle JSON, at the PR head SHA.
 
 ## 5. Review
@@ -92,8 +91,7 @@ gh issue create -R <repo> --title "<needs-role>: <one-line ask>" --label "type:r
 
   | Need | Label |
   |---|---|
-  | an engine file another crew owns | `needs:<that crew>` |
-  | a new `Mat` material | `needs:<the palette owner, see the M plan>` |
+  | a file another crew owns (new `Mat` materials included: `Palette.cs` and `Surface.cs` belong to #23) | `needs:<that crew>` |
   | an owner fact | `needs:orchestrator`; use a typed placeholder until answered |
 
 ## 7. Rate-limit hygiene

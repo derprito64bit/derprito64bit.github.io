@@ -29,7 +29,8 @@ Closes #<n>
 - [ ] The gate passed at the head SHA, the test count did not drop and the `ArtPlayTests` constants are unchanged.
 - [ ] The zones are within budget. I added no new textures except photo previews, and no UV0 by hand.
 - [ ] No owner facts are invented. Placeholders are typed and visibly marked.
-- [ ] I did not use the shared MCP tools and ran no WebGL build. Unity ran through `scripts/ion.ps1`.
+- [ ] I used shared MCP tools only while holding their lane (`scripts/fork/lane.ps1`) and released it. I ran no WebGL
+  build. Unity ran through `scripts/ion.ps1`.
 - [ ] The PR is at most about 800 changed lines (not counting `.meta` files). The last checkpoint is on the issue.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

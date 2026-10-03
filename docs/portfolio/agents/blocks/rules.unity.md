@@ -25,14 +25,15 @@ ART BIBLE LIMITS
 - Every mesh drawn with `Ion/FlatToon` uses `TEXCOORD0` = (pattern-space xyz, `PatternCode`), plus 64 for cut faces
   (art-bible section 6.1). Bake meshes through `Arch.Bake`/`BakeLocal`, and never write UV0 by hand.
 - New `Mat` materials (glass, gilt, marble, silver, velvet and so on) are added in `Surface.cs` and `Palette.cs` by the
-  crew that owns them (the M plan's palette work), with `ArchKitTests` kept green. Never use a local colour hack.
+  crew whose issue owns those files (#23, being re-scoped from Seams to engine work), with `ArchKitTests` kept green.
+  The M plan's `up/palette` and Seams-crew steps are superseded by D-022. Never use a local colour hack.
 
 UNITY AND SHARED TOOLS
 
 **MACHINE RULES (owner, 2026-10-02: "my computer is getting eaten")**
 - **Blender renders on the GPU only (AMD RX 6700 XT, HIP), never the CPU.**
   - In every Blender MCP session and every background script, first run
-    `exec(open(r"C:\Users\Aaron\Documents\GitHub\project.ion\.claude\worktrees\overhaul\scripts\fork\blender_gpu.py").read())`.
+    `exec(open(r"<your worktree root>\scripts\fork\blender_gpu.py").read())`, using your own worktree's absolute path.
     It sets HIP, enables only the GPU device and sets every scene's `cycles.device = 'GPU'`.
   - Never write `cycles.device = "CPU"`.
   - Use EEVEE for quick previews. Use Cycles at 64 samples or fewer, with denoising, for stills. Preview renders
@@ -80,7 +81,7 @@ UNITY AND SHARED TOOLS
 - **Blender MCP and other 3D or animation tools** are welcome for hero meshes, statues and props:
   - model and animate in Blender, then export FBX/GLB;
   - never commit a `.blend`, and no Git LFS;
-  - imported meshes must still meet the FlatToon vertex layout above, so bake them through the fork's mesh importer and
+  - imported meshes must still meet the FlatToon vertex layout above, so bake them through the mesh importer and
     file a `type:request` if it doesn't exist yet;
   - stay within the zone budgets;
   - Poly Haven, Sketchfab and Poly Pizza assets: CC0 or CC-BY only, credited in `docs/portfolio/CREDITS.md`.

@@ -8,7 +8,7 @@ numbers changed. Old references (in plans, comments or evidence) map like this:
 | #1 | #21 | Manor console noise (unsupported URP shaders, sound-length spam) |
 | #2 | #2 (closed) | M-F foundation, merged |
 | #3 | #22 | M-QA |
-| #4 | #23 | Seams (re-scoped: no more seams, D-022) |
+| #4 | #23 | Seams (re-scope pending: no more seams after D-022; it keeps `Palette.cs` and `Surface.cs`) |
 | #5 | #24 | M-C1 statue-scale exhibits |
 | #6 | #25 | M-C2 Foyer, Gallery, Hall, Camera Room, Wing |
 | #7 | #26 | M-C3 the owner's camera in hand |

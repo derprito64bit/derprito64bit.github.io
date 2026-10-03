@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
-  Fails when a branch changes files it may not change: upstream-owned files on fork branches, fork-only files on
-  seam branches, or anything outside a crew's owned globs.
+  Fails when a branch changes a file outside the crew's owned globs (-Owned). -Fork adds the old upstream-file rule;
+  -Seam fails fork-only files.
 
 .DESCRIPTION
   Lists the files changed in Base...Head (from the merge base; both sides of a rename count) and classifies each:
@@ -20,7 +20,6 @@
   Exits 0 when there are no violations, 1 otherwise. -Json prints one machine-readable object instead.
 
 .EXAMPLE
-  powershell -File scripts/fork/ownership-check.ps1 -Base upstream/main -Head HEAD
   powershell -File scripts/fork/ownership-check.ps1 -Base origin/main -Owned 'Assets/Portfolio/Runtime/Camera/**','docs/portfolio/camera.md'
   powershell -File scripts/fork/ownership-check.ps1 -Seam -Base upstream/main -Head up/lens -Json
 #>
