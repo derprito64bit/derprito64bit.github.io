@@ -124,7 +124,21 @@ namespace Ion.Portfolio
     public static class PortfolioContent
     {
         public const string HonoursPath = "Portfolio/honours", WorkshopPath = "Portfolio/workshop", StudyPath = "Portfolio/study";
-        public const int MaxHonours = 12, MaxCad = 3, MaxBench = 1, MaxChapters = 5;
+
+        /// <summary>
+        /// Slot caps from the plan: one glass hero, up to 3 award plinth pairs and a gantry with room for 5 medals
+        /// (M-D006), up to 3 CAD bays and one 'on the bench' slot (M-D026), and up to 5 chapter books (M-D027).
+        /// </summary>
+        public const int MaxGlass = 1, MaxAwards = 6, MaxMedals = 5, MaxCad = 3, MaxBench = 1, MaxChapters = 5;
+
+        public const int MaxHonours = MaxGlass + MaxAwards + MaxMedals;
+
+        /// <summary>The honour kinds the Hall of Honours shows.</summary>
+        public const string Glass = "glass", Award = "award", Medal = "medal";
+
+        /// <summary>The slot cap for an honour kind (0 for a kind the Hall does not show).</summary>
+        public static int MaxOfKind(string kind) =>
+            kind == Glass ? MaxGlass : kind == Award ? MaxAwards : kind == Medal ? MaxMedals : 0;
 
         static HonoursFile s_honours;
         static WorkshopFile s_workshop;
@@ -145,10 +159,27 @@ namespace Ion.Portfolio
                 if (s_honours == null)
                 {
                     s_honours = Load<HonoursFile>(HonoursPath);
-                    s_honours.honours = Trim(s_honours.honours, MaxHonours);
+                    s_honours.honours = TrimHonours(s_honours.honours);
                 }
                 return s_honours.honours;
             }
+        }
+
+        /// <summary>Keeps each kind up to its cap, in file order; kinds the Hall does not show are dropped.</summary>
+        static List<HonourEntry> TrimHonours(List<HonourEntry> list)
+        {
+            var kept = new List<HonourEntry>();
+            if (list == null) return kept;
+            var counts = new Dictionary<string, int>();
+            foreach (HonourEntry h in list)
+            {
+                if (h == null || h.kind == null) continue;
+                counts.TryGetValue(h.kind, out int n);
+                if (n >= MaxOfKind(h.kind)) continue;
+                counts[h.kind] = n + 1;
+                kept.Add(h);
+            }
+            return kept;
         }
 
         public static WorkshopFile Workshop
