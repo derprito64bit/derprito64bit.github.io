@@ -7,7 +7,8 @@ namespace Ion.Gameplay
 {
     /// <summary>
     /// Screen-space viewfinder for the instant camera: darkens the area outside the capture region (the
-    /// snapshot's 50°, 4:3 frustum as seen through the player camera, so what is framed is what is taken),
+    /// snapshot's frustum, 50° by default and 4:3, as seen through the player camera's view FOV, so what is framed
+    /// is what is taken),
     /// draws crop-mark corner ticks and a centre cross, and plays the shutter (art bible §9.1):
     ///  * raise: the corner ticks slide in from outside (0.25 s easeOutCubic) while the mask fades in;
     ///  * shutter: two Graphite blades close (0.05 s linear) and open (0.12 s easeOutQuad), then a Frost
@@ -52,6 +53,19 @@ namespace Ion.Gameplay
             vf._fovY = fovY;
             vf.Build();
             return vf;
+        }
+
+        /// <summary>Vertical FOV (degrees) of the capture frame: the mounted lens's (<see cref="InstantCamera.FovY"/>).</summary>
+        public float FovY
+        {
+            get => _fovY;
+            set
+            {
+                if (value == _fovY) return;
+                _fovY = value;
+                _lastCamFov = -1f; // lay out again
+                if (_frame != null) Layout();
+            }
         }
 
         public bool Visible
@@ -221,7 +235,7 @@ namespace Ion.Gameplay
         {
             int w = Screen.width, h = Screen.height;
             var fpc = FirstPersonController.Current;
-            float camFov = fpc != null ? fpc.BaseFieldOfView : 70f;
+            float camFov = fpc != null ? fpc.ViewFov : 70f;
             if (camFov < 1f) camFov = 70f;
             if (w == _lastW && h == _lastH && Mathf.Approximately(camFov, _lastCamFov)) return;
             _lastW = w;

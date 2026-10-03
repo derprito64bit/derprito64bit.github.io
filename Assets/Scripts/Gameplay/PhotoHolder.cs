@@ -19,6 +19,10 @@ namespace Ion.Gameplay
     /// it a few degrees with the same easing. Within <see cref="Feel.RotateAssistDegrees"/> of a multiple of
     /// 90° a gentle magnetic assist eases the roll onto it once the key is released (never a visible snap).
     /// <see cref="RollDegrees"/> is the single roll value: the overlay draws it and the placement uses it.
+    ///
+    /// Seams: <see cref="PlaceAllowedInZone"/> can refuse placing in some zones (the photo then stays held), and a
+    /// lens kit can claim the wheel, digit and Q/E keys in camera mode (<see cref="InstantCamera.ClaimsSelectionInput"/>).
+    /// Neither is set by default.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(PhotoInventory))]
@@ -27,6 +31,47 @@ namespace Ion.Gameplay
         public float ScrollCooldown = 0.08f;
         /// <summary>Views within this many degrees of level are snapped level when placing.</summary>
         public const float LevelSnapDegrees = 5f;
+
+        /// <summary>
+        /// Place guard: asked with the index of the zone the player stands in (<see cref="ZoneInfo.ZoneOf"/>) before each
+        /// placement, through the player's press and <see cref="Place"/> / <see cref="PlaceWithPress"/> alike. Null (the
+        /// default) allows placing everywhere. If any registered guard returns false the placement is refused: the photo
+        /// stays held and raised, nothing is consumed or recorded, and <see cref="PlaceRefusedPrompt"/> is shown. A guard
+        /// that throws is logged and ignored. Cleared when play starts.
+        /// </summary>
+        public static Func<int, bool> PlaceAllowedInZone;
+
+        /// <summary>
+        /// The toast for a placement refused by <see cref="PlaceAllowedInZone"/>, by zone index. Null, or a null / empty
+        /// line, shows the usual "The photo won't take here". Cleared when play starts.
+        /// </summary>
+        public static Func<int, string> PlaceRefusedPrompt;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetStatics()
+        {
+            PlaceAllowedInZone = null;
+            PlaceRefusedPrompt = null;
+        }
+
+        /// <summary>
+        /// True when placing is allowed in <paramref name="zone"/>: no <see cref="PlaceAllowedInZone"/>, or every guard
+        /// registered on it returns true (a guard that throws counts as allowing).
+        /// </summary>
+        public static bool IsPlaceAllowed(int zone)
+        {
+            Func<int, bool> guard = PlaceAllowedInZone;
+            if (guard == null) return true;
+            foreach (Delegate d in guard.GetInvocationList())
+            {
+                try
+                {
+                    if (!((Func<int, bool>)d)(zone)) return false;
+                }
+                catch (Exception e) { Debug.LogException(e); }
+            }
+            return true;
+        }
 
         FirstPersonController _fpc;
         PhotoInventory _inventory;
@@ -120,7 +165,7 @@ namespace Ion.Gameplay
             }
 
             bool active = IonInput.Active;
-            if (active && kb != null && mouse != null) HandleSelection(kb, mouse);
+            if (active && kb != null && mouse != null && !CameraClaimsInput) HandleSelection(kb, mouse);
 
             SyncRoll();
 
@@ -170,6 +215,40 @@ namespace Ion.Gameplay
             }
         }
 
+        /// <summary>
+        /// True while the camera is out and a lens kit claims the wheel, digit and Q/E keys
+        /// (<see cref="InstantCamera.ClaimsSelectionInput"/>): the photo selection is left alone. (Q/E never rolls a photo
+        /// in camera mode anyway: no photo can be raised while the camera is out.)
+        /// </summary>
+        internal bool CameraClaimsInput
+        {
+            get
+            {
+                if (_instantCamera == null) _instantCamera = GetComponent<InstantCamera>();
+                return _instantCamera != null && _instantCamera.IsCameraMode && _instantCamera.ClaimsSelectionInput;
+            }
+        }
+
+        /// <summary>
+        /// The place guard's answer for where the player stands now; on a refusal, shows the prompt line.
+        /// </summary>
+        bool PlaceRefusedHere()
+        {
+            if (PlaceAllowedInZone == null) return false;
+            Transform body = _fpc != null ? _fpc.transform : transform;
+            int zone = ZoneInfo.ZoneOf(body.position);
+            if (IsPlaceAllowed(zone)) return false;
+            string line = null;
+            Func<int, string> prompt = PlaceRefusedPrompt;
+            if (prompt != null)
+            {
+                try { line = prompt(zone); }
+                catch (Exception e) { Debug.LogException(e); }
+            }
+            GameplayUI.Toast(string.IsNullOrEmpty(line) ? "The photo won't take here" : line);
+            return true;
+        }
+
         /// <summary>Raises the selected photo now (automation; same state as holding Shift). False if nothing to raise.</summary>
         public bool Raise()
         {
@@ -209,6 +288,7 @@ namespace Ion.Gameplay
         public bool Place()
         {
             if (!IsRaised || _inventory.Selected == null) return false;
+            if (PlaceRefusedHere()) return false;
             CancelPress();
             return PlaceNow(_inventory.Selected, _inventory.SelectedIndex, RollDegrees);
         }
@@ -392,6 +472,7 @@ namespace Ion.Gameplay
         /// <summary>LMB: the card presses in (0.10 s) with the view held still, then the world swaps.</summary>
         void BeginPress()
         {
+            if (PlaceRefusedHere()) return; // the photo stays held as it is
             _pressPhoto = _inventory.Selected;
             _pressIndex = _inventory.SelectedIndex;
             _pressRoll = RollDegrees;

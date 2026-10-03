@@ -334,13 +334,13 @@ namespace Ion.Presentation
 
             float aspect = PhotoAspect(_display);
 
-            // Raised pose: footprint of the photo frustum at the player camera.
+            // Raised pose: footprint of the photo frustum at the player camera (its view FOV, a lens view included).
             float camFov = 60f;
             float camAspect = screenW / screenH;
             var fpc = FirstPersonController.Current;
             if (_camera != null)
             {
-                camFov = fpc != null && fpc.Camera == _camera ? fpc.BaseFieldOfView : _camera.fieldOfView;
+                camFov = fpc != null && fpc.Camera == _camera ? fpc.ViewFov : _camera.fieldOfView;
                 camAspect = _camera.aspect;
             }
             float photoFov = _display.FovY > 0.1f ? _display.FovY : camFov;
