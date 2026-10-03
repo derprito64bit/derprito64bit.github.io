@@ -24,5 +24,16 @@ namespace Ion.Tests.PlayMode
                 Object.Destroy(host);
             }
         }
+
+#if UNITY_EDITOR
+        /// <summary>IonArcade.jslib moved out of Plugins/WebGL: it must still link into the Web player.</summary>
+        [Test]
+        public void ArcadeBridge_StillTargetsWebGL()
+        {
+            var importer = UnityEditor.AssetImporter.GetAtPath("Assets/Portfolio/Runtime/Overlay/IonArcade.jslib") as UnityEditor.PluginImporter;
+            Assert.IsNotNull(importer, "IonArcade.jslib imports as a plugin");
+            Assert.IsTrue(importer.GetCompatibleWithPlatform(UnityEditor.BuildTarget.WebGL), "and is compiled into the WebGL build");
+        }
+#endif
     }
 }
