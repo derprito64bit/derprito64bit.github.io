@@ -1,4 +1,4 @@
-# Fleet protocol (fork side)
+# Fleet protocol (Manor repo)
 
 The GitHub repo `derprito64bit/derprito64bit.github.io` is the fleet's durable work log:
 - **Issues are crew briefs:** acceptance criteria, owned globs, the gate and `after[]` dependencies.
@@ -40,9 +40,9 @@ Gate: `<exact command to rerun>` -> <result>
 
 ## 3. Branches and pull requests
 
-- Branch: `crew/<id>` (branch protocol in the rules block). Only the Seams crew writes `up/<seam>` branches.
+- Branch: `crew/<id>` from `origin/main` (branch protocol in the rules block). There are no `up/*` branches any more (D-022).
 - **Draft PR at your first commit:** fill in a copy of [`PR_TEMPLATE.md`](PR_TEMPLATE.md), then run
-  `gh pr create -R <repo> --draft --base overhaul --head crew/<id> --title "<id>: <outcome>" --body-file pr.md`.
+  `gh pr create -R <repo> --draft --base main --head crew/<id> --title "<id>: <outcome>" --body-file pr.md`.
   The body contains `Closes #<n>`.
 - One crew, one issue, one PR, about 800 changed lines at most (not counting `.meta`). Larger? Ask in the issue to split it.
 - **Ready:** the full gate is green and the PR body has current evidence. Run `gh pr ready <pr> -R <repo>`, then set
@@ -54,9 +54,8 @@ Gate: `<exact command to rerun>` -> <result>
 - **Iterate:** `powershell -File scripts/ion.ps1 test-play -Filter <YourTests>` (or `test-edit`), with
   `run_in_background`. Poll `Build/logs/<step>.log`; results land in `Build/results-<platform>.xml`.
 - **Before review:** run `powershell -File scripts/ion.ps1 test` once and paste its passed/failed summary lines.
-- **Ownership:** after `git fetch origin`, `powershell -File scripts/fork/ownership-check.ps1 -Base origin/overhaul -Owned '<glob>','<glob>'` with your
-  issue's globs (Seams crew: `-Seam -Base upstream/main`). It must print `PASS` and exit 0.
-  - Exception rows come from `scripts/fork/ownership-exceptions.txt`. Only the orchestrator edits that file.
+- **Ownership:** after `git fetch origin`, `powershell -File scripts/fork/ownership-check.ps1 -Base origin/main -Owned '<glob>','<glob>'` with your
+  issue's globs. It must print `PASS` and exit 0.
 - **Evidence:** `TourShots` PNGs and the per-zone batch and triangle JSON, at the PR head SHA.
 
 ## 5. Review
@@ -92,8 +91,7 @@ gh issue create -R <repo> --title "<needs-role>: <one-line ask>" --label "type:r
 
   | Need | Label |
   |---|---|
-  | an upstream-owned file | `needs:seams` |
-  | a new `Mat` material | `needs:seams` (the `up/palette` seam) |
+  | a file another crew owns (new `Mat` materials included: `Palette.cs` and `Surface.cs` belong to #23) | `needs:<that crew>` |
   | an owner fact | `needs:orchestrator`; use a typed placeholder until answered |
 
 ## 7. Rate-limit hygiene

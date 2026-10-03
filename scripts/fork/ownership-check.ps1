@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
-  Fails when a branch changes files it may not change: upstream-owned files on fork branches, fork-only files on
-  seam branches, or anything outside a crew's owned globs.
+  Fails when a branch changes a file outside the crew's owned globs (-Owned). -Fork adds the old upstream-file rule;
+  -Seam fails fork-only files.
 
 .DESCRIPTION
   Lists the files changed in Base...Head (from the merge base; both sides of a rename count) and classifies each:
@@ -12,15 +12,15 @@
   A .meta file is classified like the file or folder it describes.
 
   Violations:
-    default    upstream files (not exception or seam)
+    default    (standalone, D-022) only -Owned is enforced: the project is no longer a fork, so engine files are ours
+    -Fork      the old fork rule: upstream files (not exception or seam) are violations
     -Seam      fork-only files (for up/* branches, which may change upstream files)
-    -Owned     additionally, any file that matches none of the given globs (the crew's issue lists them)
+    -Owned     any file that matches none of the given globs (the crew's issue lists them)
   Globs: ** any depth, * within one folder, ? one character, {a,b} alternatives; case-insensitive.
   Exits 0 when there are no violations, 1 otherwise. -Json prints one machine-readable object instead.
 
 .EXAMPLE
-  powershell -File scripts/fork/ownership-check.ps1 -Base upstream/main -Head HEAD
-  powershell -File scripts/fork/ownership-check.ps1 -Base origin/overhaul -Owned 'Assets/Portfolio/Runtime/Camera/**','docs/portfolio/camera.md'
+  powershell -File scripts/fork/ownership-check.ps1 -Base origin/main -Owned 'Assets/Portfolio/Runtime/Camera/**','docs/portfolio/camera.md'
   powershell -File scripts/fork/ownership-check.ps1 -Seam -Base upstream/main -Head up/lens -Json
 #>
 [CmdletBinding()]
@@ -28,6 +28,7 @@ param(
     [Parameter(Mandatory = $true)][string]$Base,
     [string]$Head = 'HEAD',
     [switch]$Seam,
+    [switch]$Fork,
     [string[]]$Owned,
     [switch]$Json
 )
@@ -127,7 +128,7 @@ foreach ($row in @($diff | Where-Object { $_ })) {
 
         $problems = @()
         if ($Seam -and $class -eq 'fork-only') { $problems += 'fork-only path on a seam branch' }
-        if (-not $Seam -and $class -eq 'upstream') {
+        if ($Fork -and -not $Seam -and $class -eq 'upstream') {
             $who = 'its owner'
             if ($lead) { $who = $lead }
             $problems += "upstream-owned: request it from $who (type:request) or build a seam"
@@ -144,7 +145,8 @@ foreach ($row in @($diff | Where-Object { $_ })) {
 $counts = [ordered]@{}
 foreach ($c in 'fork-only', 'exception', 'seam', 'upstream') { $counts[$c] = @($files | Where-Object { $_.class -eq $c }).Count }
 $violations = @($files | Where-Object { $_.violation })
-$mode = 'fork'
+$mode = 'standalone'
+if ($Fork) { $mode = 'fork' }
 if ($Seam) { $mode = 'seam' }
 
 if ($Json) {

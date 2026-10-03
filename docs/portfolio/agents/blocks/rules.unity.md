@@ -2,13 +2,14 @@ ABSOLUTE RULES: Unity track (M and G crews). Process details: docs/portfolio/age
 
 THE REPOSITORY
 - Your worktree is the only source of truth. Inspect before you change. No side projects, demos or throwaway prototypes.
-- Fork-only paths, the only ones you may edit: `Assets/Portfolio/**`, `site/**`, `scripts/fork/**`, `docs/portfolio/**`,
-  `docs/FORK.md`. Edit only the globs listed in your issue.
-- Every other file belongs to upstream and an art-bible Lead (docs/art-bible.md section 10). Do not edit it. If your
-  feature needs it, a seam is missing: file a `type:request` with `needs:seams`. The Seams crew builds it on an `up/*` branch
-  cut from `upstream/main`, and the orchestrator merges it.
-- `scripts/ion.ps1` is the generic runner. Only a crew that owns it may change it, and its changes must stay generic.
-- Send nothing to Lets-be-strategic-here/project.ion: no pushes, PRs, issues or comments. Pass
+- **This is a standalone project (D-022), no longer a fork.** Any file in the repo may change, engine files included.
+  Edit only the globs listed in your issue; if you need a file outside them, file a `type:request` for its owner crew.
+- There are no more seams or `up/*` branches. Engine changes go straight into crew branches, with tests. Keep them
+  clean and tested, because the collab repo is still a source of ideas.
+- `main` is the project branch (`overhaul` is retired at d1db3f8). Base every crew branch on `origin/main`, and target
+  every PR at `main`.
+- The art bible (`docs/art-bible.md`) is still the style guide. Its Lead ownership table no longer restricts edits.
+- Send nothing to Lets-be-strategic-here/project.ion (it stays a read-only `upstream` remote for inspiration). Pass
   `-R derprito64bit/derprito64bit.github.io` to every `gh` command.
 
 BUDGETS (enforced by the Unity suite)
@@ -23,15 +24,16 @@ ART BIBLE LIMITS
   and shader parameters.
 - Every mesh drawn with `Ion/FlatToon` uses `TEXCOORD0` = (pattern-space xyz, `PatternCode`), plus 64 for cut faces
   (art-bible section 6.1). Bake meshes through `Arch.Bake`/`BakeLocal`, and never write UV0 by hand.
-- The `Mat` palette (`Palette.cs`) is Lead A's. A new material (glass, gilt, marble, velvet and so on) is a request to
-  the `up/palette` seam. Never use a local colour hack.
+- New `Mat` materials (glass, gilt, marble, silver, velvet and so on) are added in `Surface.cs` and `Palette.cs` by the
+  crew whose issue owns those files (#23, being re-scoped from Seams to engine work), with `ArchKitTests` kept green.
+  The M plan's `up/palette` and Seams-crew steps are superseded by D-022. Never use a local colour hack.
 
 UNITY AND SHARED TOOLS
 
 **MACHINE RULES (owner, 2026-10-02: "my computer is getting eaten")**
 - **Blender renders on the GPU only (AMD RX 6700 XT, HIP), never the CPU.**
   - In every Blender MCP session and every background script, first run
-    `exec(open(r"C:\Users\Aaron\Documents\GitHub\project.ion\.claude\worktrees\overhaul\scripts\fork\blender_gpu.py").read())`.
+    `exec(open(r"<your worktree root>\scripts\fork\blender_gpu.py").read())`, using your own worktree's absolute path.
     It sets HIP, enables only the GPU device and sets every scene's `cycles.device = 'GPU'`.
   - Never write `cycles.device = "CPU"`.
   - Use EEVEE for quick previews. Use Cycles at 64 samples or fewer, with denoising, for stills. Preview renders
@@ -79,7 +81,7 @@ UNITY AND SHARED TOOLS
 - **Blender MCP and other 3D or animation tools** are welcome for hero meshes, statues and props:
   - model and animate in Blender, then export FBX/GLB;
   - never commit a `.blend`, and no Git LFS;
-  - imported meshes must still meet the FlatToon vertex layout above, so bake them through the fork's mesh importer and
+  - imported meshes must still meet the FlatToon vertex layout above, so bake them through the mesh importer and
     file a `type:request` if it doesn't exist yet;
   - stay within the zone budgets;
   - Poly Haven, Sketchfab and Poly Pizza assets: CC0 or CC-BY only, credited in `docs/portfolio/CREDITS.md`.
@@ -100,18 +102,17 @@ FACTS
   visible text. Never use an AI-generated image.
 
 BRANCH PROTOCOL (your issue gives `<id>`)
-- Start. Fresh harness worktrees begin on `origin/main`, NOT on overhaul.
+- Start. Fresh harness worktrees begin on `origin/main`, the project branch.
   - `git fetch origin`.
   - If `origin/crew/<id>` exists: `git checkout -B crew/<id> origin/crew/<id>`. Otherwise:
-    `git checkout -B crew/<id> origin/overhaul`.
+    `git checkout -B crew/<id> origin/main`.
   - Warm Unity before your first run:
     `powershell -File scripts/ion.ps1 seed-library -Target <your worktree root>` (about 45 s). The first filtered
     test then takes about 1 min.
 - Work: commit small, then push with `git push origin HEAD:refs/heads/crew/<id>`.
-  - Never force-push. Never push to `main`, `overhaul` or `up/*`. No Git LFS.
+  - Never force-push. Never push to `main` (the orchestrator merges), `overhaul` (retired) or `up/*`. No Git LFS.
 - Before every push, run `git fetch origin`, then
-  `powershell -File scripts/fork/ownership-check.ps1 -Base origin/overhaul -Owned '<glob>','<glob>'`. It must exit 0.
-  Seams crew: add `-Seam` and use `-Base upstream/main`.
+  `powershell -File scripts/fork/ownership-check.ps1 -Base origin/main -Owned '<glob>','<glob>'`. It must exit 0.
 - Use the GitHub issue as your work log. Open a draft PR at your first commit. Post a checkpoint comment (done, next,
   blockers, SHA, gate command) at most every 15 minutes.
 - Need something outside your globs, or found a bug there? File an issue request (`type:request` or `type:bug`,

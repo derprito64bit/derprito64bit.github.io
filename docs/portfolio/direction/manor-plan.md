@@ -1,6 +1,10 @@
 # Manor plan (locked)
 
 > Wave 1b M-Manager final (seven rooms per D-003, Workshop/Study design, 2 red-team seats), locked by the orchestrator in Wave 2. Owner decisions in `docs/portfolio/agents/decisions.md` take precedence.
+>
+> **D-022 (2026-10-03): the repo is standalone.** Every `up/*` seam step, the Seams crew and M-D021 below are
+> superseded. Engine changes, new `Mat`s in `Palette.cs` and `Surface.cs` included, go straight into the owning crew's
+> branch from `origin/main` (palette: #23). Crew issue numbers changed; see `docs/portfolio/agents/ISSUES.md`.
 
 # Manor plan: final (M-Manager, Wave 1b)
 
