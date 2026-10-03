@@ -1,0 +1,10 @@
+{
+  "honours": [
+    { "id": "glass", "kind": "glass", "title": "[PLACEHOLDER: name of the glass award]", "issuer": "[PLACEHOLDER: who awarded it]", "year": "[PLACEHOLDER: year]", "citation": "[PLACEHOLDER: one line on what it was for]", "media": [], "placeholder": true },
+    { "id": "award-01", "kind": "award", "title": "[PLACEHOLDER: award 1 name]", "issuer": "[PLACEHOLDER: who awarded it]", "year": "[PLACEHOLDER: year]", "citation": "[PLACEHOLDER: one line on what it was for]", "media": [], "placeholder": true },
+    { "id": "award-02", "kind": "award", "title": "[PLACEHOLDER: award 2 name]", "issuer": "[PLACEHOLDER: who awarded it]", "year": "[PLACEHOLDER: year]", "citation": "[PLACEHOLDER: one line on what it was for]", "media": [], "placeholder": true },
+    { "id": "medal-01", "kind": "medal", "title": "[PLACEHOLDER: medal 1 name]", "issuer": "[PLACEHOLDER: who awarded it]", "year": "[PLACEHOLDER: year]", "citation": "[PLACEHOLDER: one line on what it was for]", "media": [], "placeholder": true },
+    { "id": "medal-02", "kind": "medal", "title": "[PLACEHOLDER: medal 2 name]", "issuer": "[PLACEHOLDER: who awarded it]", "year": "[PLACEHOLDER: year]", "citation": "[PLACEHOLDER: one line on what it was for]", "media": [], "placeholder": true },
+    { "id": "medal-03", "kind": "medal", "title": "[PLACEHOLDER: medal 3 name]", "issuer": "[PLACEHOLDER: who awarded it]", "year": "[PLACEHOLDER: year]", "citation": "[PLACEHOLDER: one line on what it was for]", "media": [], "placeholder": true }
+  ]
+}
