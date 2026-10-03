@@ -1,0 +1,1344 @@
+{
+ "decisions": [
+  {
+   "id": "M-D001",
+   "topic": "Room set and emotional curve (D-003)",
+   "choice": "Seven Manor zones: Foyer, Grand Gallery (the arcade is a bay at its far end), Hall of Honours, Camera Room, Workshop (robotics/CAD), Study (about and contact) and Painting Wing. Painting Worlds are G zones behind the Wing. The curve runs welcome (Foyer), intimacy (Study, optional), anticipation (Gallery), focus (Workshop), reverence (Hall), curiosity (Camera Room), wonder (Wing) and play (arcade bay). The robot/CAD statue moves from the Gallery centre line to the Workshop, and the contact bureau moves from the Foyer to the Study. There is no separate Arcade zone.",
+   "rationale": "D-003 (locked by the owner) overrides the draft's five rooms. The Study brings back m01's intimacy beat. WS-D02 answers m02's objection ('almost nobody would find a Study') by putting the Study door in the Foyer, in view from spawn.",
+   "servesBeat": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "decidingRole": "owner (D-003), applied by M-Manager",
+   "alternatives": [
+    "Draft M-D001: five rooms, Workshop and Study cut (overruled by D-003)",
+    "m01: seven rooms with an Arcade Parlour and no Workshop",
+    "Fold the Study into a Foyer niche"
+   ],
+   "budgetImpact": "Two more zones: Workshop about 50 batches / 15k tris and Study about 38 / 10.5k (est., WS-D08). Both are Lazy, so they cost boot time only until streaming lands."
+  },
+  {
+   "id": "M-D002",
+   "topic": "Circulation and the always-available skip",
+   "choice": "Door graph:\n- Foyer: Grand Gallery (centre, wide), Study (left), game t1 (right, D-009).\n- Gallery: Foyer (south wall beside spawn), Hall of Honours (west wall, bay 3), Workshop (east wall, bay 3), Camera Room (far wall, east of the arcade).\n- Camera Room: Wing, then worlds.\nHall, Workshop, Study and Wing each have exactly one [ GRAND GALLERY ] door within 3 m of arrival (Hall 2.82 m, Workshop 2.70 m, Study 2.46 m).\nDepth from the Gallery: 1 for Foyer, Hall, Workshop and Camera Room; 2 for Study and Wing; 3 for a world.\nReturns land beside the door the visitor used:\n- from the Hall: (-2.8, 0, 37.5), yaw 90;\n- from the Workshop: (2.8, 0, 37.5), yaw -90;\n- from the Camera Room: (3.25, 0, 41.0), yaw 180;\n- from the Study and the Wing: the Gallery spawn.\nThe Gallery has exactly 4 doors and the Foyer exactly 3.\nThree DOM layers reach the Gallery in one step: the loader button, the first item in the pause sheet, and the first entry in the M plan.",
+   "rationale": "Follows WS-D02. It also meets m-red-detail's limit of at most 4 doors in the Gallery. The Workshop and Camera Room share the east wall, the side of making. GoToZone(index, feet, yaw) can land the visitor beside the door they used (GameBootstrap.cs:330-336). The game door stays only in the Foyer (D-009), so ManorTests.Foyer_GameDoorLeadsToTheTutorial keeps its assertion.",
+   "servesBeat": [
+    "1",
+    "2",
+    "3"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "m-red-hostile: pf.study and pf.workshop both off the Gallery (5 Gallery doors, about 81 > 80 batches with pods)",
+    "m-red-detail: Workshop and Study doors off the Hall",
+    "Draft: the Gallery as the only hub"
+   ],
+   "budgetImpact": "Doors are padless (M-D024): 0 device batches and 1 lintel canvas each. The DOM layers cost 0."
+  },
+  {
+   "id": "M-D003",
+   "topic": "Zone registry, keys and URLs",
+   "choice": "Zone registry (order, index, x):\n- pf.foyer: 1000, 6, 300\n- pf.gallery: 1010, 7, 350\n- pf.honours: 1020, 8, 400\n- pf.lens: 1030, 9, 450 (title 'Camera Room')\n- pf.wing: 1040, 10, 500\n- pf.workshop: 1050, 11, 550 (title 'Workshop')\n- pf.study: 1060, 12, 600 (title 'Study')\nPainting Worlds use G's keys, pw.* from order 1100, so they take index 13 and up and x 650 and up (the pilot is pw.starry, G-D008).\nClosed rooms stay within ±9 m of their root in X.\nStartKeyFromUrl gains these aliases: honours|hall, lens|lenses|camera-room, wing, workshop|robot|cad, study|about|contact. '?zone=camera' still means the core puzzle wing.\nThe ZoneCatalogTests check that Rooms.Count - ZoneCatalog.Count == 6 is untouched.",
+   "rationale": "Index = 6 + rank by (order, key) and x = index*50 (ZoneCatalog.cs:132-139). Appending the two new orders after the Wing keeps the five draft rooms at indices 6-10 (WS-D01). Tests find zones by key with IndexOfKey. No core zone title contains 'Workshop' or 'Study', so IonDebug lookups stay unambiguous.",
+   "servesBeat": [
+    "3",
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "m-red-hostile: Study 1015 and Workshop 1035 (would shift later indices and expected constants)",
+    "Draft: pf.world.* keys (G locked pw.*)"
+   ],
+   "budgetImpact": "None."
+  },
+  {
+   "id": "M-D004",
+   "topic": "Room shells and sizes",
+   "choice": "ManorHall.Build gains a height parameter, Door works on any wall, and a faceted apse helper is added.\nInner sizes (W x L x H):\n- Foyer: 18 x 24 x 6 (x ±9, z -4..20)\n- Gallery: 10 x 48 x 7.5 (x ±5, z -4..44)\n- Hall: 16 x 18 x 9 (x ±8, z -4..14, apse z 8..14)\n- Camera Room: 16 x 24 x 6 (z -4..20)\n- Wing: 12 x 14 x 7 (z -4..10)\n- Workshop: 14 x 16 x 7 (x ±7, z -4..12)\n- Study: 10 x 14 x 4.5 (x ±5, z -4..10)\nEvery shell follows these rules:\n- Closed roofs use Arch.Roof with parapet 0.\n- Style.Base is a Mat already in the room.\n- The ceiling is a dark Walnut field with no coffer pattern, with Brass fillets on the cornice lip and the beam soffits.\n- No walkable wall uses Pat.Lattice.\n- Column shafts are stone (Limestone, then Marble after up/palette), never Style.Wall.",
+   "rationale": "m-red-hostile F3/F9: size each room to its launch content. The Gallery height is 0.75 of its width; manor-refs rule 1 asks 1.0-1.2, but the Hall must stay the tallest room (D-004). m-red-detail measured the ceiling at 25-29% of the first view and found the hidden parapets cost 384 tris per room. Arch.Roof exposes a parapet parameter (Arch.cs:680).",
+   "servesBeat": [
+    "1",
+    "2",
+    "3",
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Draft: Gallery 15 x 48 x 6, Hall 16 x 40 x 9, Wing 12 x 34 x 7",
+    "m-red-hostile: Gallery 10 x 40 x 7.5, Hall 16 x 26 x 9"
+   ],
+   "budgetImpact": "About -384 tris per room for the parapets. The fillets cost about 200 tris and 0 batches. The narrower Gallery shell is about neutral in tris (est.)."
+  },
+  {
+   "id": "M-D005",
+   "topic": "Grand Gallery re-curation",
+   "choice": "The room: x ±5, z -4..44, 7.5 m high. Spawn (0,0,-2), yaw 0. The [ FOYER ] doorway is on the south wall at x -3.0.\nBay 1 (z -4..12):\n- works 1-2 (the owner's strongest) at z 5 on both walls, 4.2 x 3.15 m, bottom edge 1.35 m (above the rail).\nCross-arch A (z 12):\n- carries the owner's name frieze, facing spawn, cap height 0.45 m.\nBay 2 (z 12..28):\n- works 3-6 at z 16.5 and z 23.5, 3.2 x 2.4 m, centre y 2.6.\nCross-arch B: z 28.\nBay 3 (z 28..40):\n- works 7-8 at z 30.75, centre y 3.0;\n- door prints at (∓4.95, 2.75, 34.25);\n- [ HALL OF HONOURS ] doorway on the west wall and [ WORKSHOP ] on the east wall, both centred at z 37.5, thresholds at x ∓4.2.\nArcade bay (z 40..44):\n- the cabinet on the centre line at ArcadeBase (0,0,42.75), facing -Z;\n- the [ CAMERA ROOM ] doorway on the far wall at x +3.25;\n- a framed 'Plan of the house' at x -3.25 (E opens the M plan).\nThe carpet is 1.5 m wide. White mats, frame-side benches, blurb hints and toasts are removed. There are 8 frames, as ManorTests asserts.",
+   "rationale": "Owner voice: 'overly large as if they were statues' (m-red-hostile F3). With the robot moving to the Workshop, the arcade becomes the focal object on the centre line (m-red-detail). Alternating hang heights break the corridor-of-frames rhythm. The arcade test still places the player at ArcadeBase + (0,0,-1.6), which is outside every door trigger.",
+   "servesBeat": [
+    "1",
+    "2",
+    "3"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Draft M-D005: keep 15 x 48 x 6 and 2.4 x 1.8 m frames with the robot on the axis",
+    "m-red-hostile: 10 x 40 x 7.5 m"
+   ],
+   "budgetImpact": "Cap 80 batches (canvases included) / 44k tris. Estimate: about 55 mesh batches + 15 canvases. 2 pods removed (about -12), 2 PrintCards added (+2)."
+  },
+  {
+   "id": "M-D006",
+   "topic": "Hall of Honours",
+   "choice": "16 x 18 x 9 m with a faceted apse (z 8..14).\nArrival:\n- Arrival is the first-view [ ] medallion at (0,0,-1.5), yaw 0.\n- The [ GRAND GALLERY ] door is at (-2.25, 0, -3.2), 2.82 m from arrival.\nThe DECA hero:\n- Base at (0,0,8.5), 10 m from arrival, set against the plain light apse wall with at least 1 m of margin.\n- Keyed from 30-45 degrees above.\nAwards and medals:\n- Award plinths are built from honours.json, in up to 3 pairs at x ±5.75 and z 1.0 / 3.5 / 6.0. All of them sit outside the print's ±31.8 degree frame. One pair at launch.\n- A medal gantry (3 shown, room for 5) stands on the east wall at z -1.0, facing -X.\nFinish:\n- Floor in Limestone/Terrazzo (Marble after up/palette).\n- One rope line around the DECA, 1.5-2.0 m from its plinth.\n- No vitrines.",
+   "rationale": "D-004: a 9 m hall over a 4.25 m DECA gives 2.1x. m-red-hostile F9: size the room to its content. Arriving on the inlay makes the Gallery door print literal: from the inlay the hero fills 48% of a 50-degree print (computed). manor-refs rule 9. m-red-detail: the rope is the cheapest scale cue.",
+   "servesBeat": [
+    "3"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Draft: 16 x 40 m with the inlay 10 m in from arrival",
+    "m-red-hostile: 16 x 26 m"
+   ],
+   "budgetImpact": "Cap 90 / 45k. Heroes: code DECA 4 batches / 850 tris; authored heroes up to 8k tris and 4 batches each."
+  },
+  {
+   "id": "M-D007",
+   "topic": "Camera Room",
+   "choice": "pf.lens, 16 x 24 x 6, Eager (its sample prints are diorama shots).\nThe room:\n- A cool, dark darkroom: graphite walls and oak boards.\n- One amber safelight pool (#E39B2B, the shared accent read from identity.json) over a Frost print table. No brown fog.\nThe monument:\n- The X-T5 monument stands on the axis: 1:1 proportions with the real FUJIFILM and X-T5 lettering (D-011).\n- It is Silver after up/palette, and never Concrete standing in for silver.\nThe camera and its kit:\n- A camera stand (CameraPickup) hands Manor visitors the camera.\n- 4 lens plinths (50, 85, 135 and 16 mm), each with a sample print taken at that lens's FovY.\n- 3 film plinths: Vivid, Mono and Cyanotype (D-006 names).\n- Pickups use at most 2 Mats (Graphite + Brass). Plinth bodies are Soft zone geometry.\nPasting photos is allowed here (D-008).\nThe room comes off the delete list.",
+   "rationale": "m-red-hostile F2/F6. m-red-detail on device batches. The D-001 Darkroom identity: the Front Door's backlit light table appears here in 3D, under its own safelight.",
+   "servesBeat": [
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Draft: a warm darkroom with brown fog (#3A1E14)",
+    "Fold the room into a Wing vestibule (cut)"
+   ],
+   "budgetImpact": "Cap 85 / 40k. Pickups cost about 2 batches each instead of 3-7 (est.)."
+  },
+  {
+   "id": "M-D008",
+   "topic": "Painting Wing",
+   "choice": "12 x 14 x 7 m in pale plaster and limestone, the only room without candles.\nPortal anchors come from the PaintingWorldRegistry list:\n- with 1 world it hangs on the far wall, on the axis;\n- worlds 2-3 take staggered side slots (left z 2.0, right z 5.5).\nEach canvas is 3.2 x 2.56 m, with a brass threshold inlay 1.2 m in front.\nThe canvas is a photo preview of the world or G's procedural relief, never a scan.\nG-C3 owns the portals.",
+   "rationale": "m-red-hostile F9: a 34 m wing holding one frame reads as unfinished. The art bible allows only photo previews as textures.",
+   "servesBeat": [
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Draft: 12 x 34 x 7 m with 5 slots",
+    "m-red-hostile: 12 x 14 m with the next bay walled off"
+   ],
+   "budgetImpact": "Cap 55 / 25k."
+  },
+  {
+   "id": "M-D009",
+   "topic": "Exhibit grammar and verbs",
+   "choice": "Display types:\n- frame: project;\n- plinth statue: award (Hall);\n- robot/CAD statue: Workshop;\n- gantry: medals;\n- lens or film plinth;\n- easel: print;\n- cabinet: playable demo;\n- CAD bay: CAD model;\n- [ ] medallion: a viewpoint.\nE reads (range 4.5 m, prompt 'read') and opens the DOM wall label.\nEach class also has one physical response, all switched off under reduced motion:\n- medals swing on their ribbons (soft spring, 2.08 Hz / 0.58);\n- the DECA catches a 1.2 s light sweep (after up/palette);\n- the camera is picked up;\n- the arcade plays;\n- the Study candle lights;\n- the robot's response is the visitor's own walk (anamorphic).\nNo turntables and no continuous animation.",
+   "rationale": "The north star checks every decision against 'tactile' and 'playful'; 'less motion' is only rule 6, a tie-break (m-red-hostile F10). Each response is one short event.",
+   "servesBeat": [
+    "3",
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Draft M-D009: E reads, and nothing moves",
+    "Turntables and statue quarter-turns (cut)"
+   ],
+   "budgetImpact": "Medals become devices with at most 2 Mats each (up to +6 batches in the Hall, est.). The sweep costs 0 batches."
+  },
+  {
+   "id": "M-D010",
+   "topic": "Hero build method",
+   "choice": "Two paths.\n(a) Code-built HeroKit (PropBuild/Arch plus Frustum and ClippedHull) ships first and stays the permanent fallback. Budgets (batches / tris):\n- DECA: 4 / 850\n- gantry: 4 / 2.5k\n- camera: 2 / 2.1k\n- robot: 2 / 1.4k\n(b) Authored heroes (M-C8): Blender models (GPU only, D-012) exported as convex parts named <Mat>.<part>. Each part is rebuilt as a ClippedHull and baked through Arch.BakeLocal (FlatToon UV0, no textures). Three heroes: the DECA glass, the X-T5 monument with its lettering, and the robot. Each stays at or under 8k tris and 4 batches, with no Ultra twins.\nHeroKit calls AuthoredHero.TryBuild(id) first and falls back to (a). RobotStatue takes an ExplodeSpec (anamorphic) on both paths.",
+   "rationale": "Owner voice: 'model a some absolutely huge things with extreme detail that is performance friendly that's why i gave you a blender mcp connection'. D-011 lettering needs authored geometry. Convex parts keep photo cutting and Arch.Validate working, so no importer seam is needed.",
+   "servesBeat": [
+    "3",
+    "4"
+   ],
+   "decidingRole": "owner-voice, applied by M-Manager",
+   "alternatives": [
+    "Draft M-D010: code only; Blender waits",
+    "m-red-detail: cap the monument at 2.5k tris",
+    "m-red-hostile: 6-10k tris each"
+   ],
+   "budgetImpact": "Up to 8k tris and 4 batches per authored hero."
+  },
+  {
+   "id": "M-D011",
+   "topic": "Placeholder and texture hygiene",
+   "choice": "Content v2 marks every entry placeholder:true, and every visible string reads [PLACEHOLDER: ...].\nThe content files are:\n- projects.json (+links, media, tags);\n- honours.json;\n- workshop.json (robot HeroSpec, cad[0..3], bench[0..1]);\n- study.json (contact, chapters[0..5], portrait).\nSlots are built from lists, so nothing empty exists. A frame with no cover shows a Frost [ ] slide.\nNo runtime Texture2D is allowed in pf.* zones except photo previews. Whether owner covers count as photo previews is escalated.",
+   "rationale": "Non-negotiable 1 and owner-voice ('Placeholders only for now'). The runtime washes in ManorKit.cs:217, 246 and 303 stretch the texture rule.",
+   "servesBeat": [
+    "3"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Keep the runtime-generated washes"
+   ],
+   "budgetImpact": "Removes 3 runtime textures. 0 batches."
+  },
+  {
+   "id": "M-D012",
+   "topic": "Mood family (anti-muddy-orange)",
+   "choice": "Every interior mood:\n- a cool, dim key (start #8E9CC8 at intensity 0.25 or less, tuned with TourShots);\n- a cool blue-violet fill, assigned after ZoneMood.Make;\n- a cool plum-blue fog horizon, #1C1A2E.\nWarm light comes only from flame cones, shader pools and Ultra LocalLights. The ceiling is the darkest value in every room.\nPer room:\n- Foyer: the brightest room.\n- Gallery: fog starts at 14 m.\n- Hall: dark nave, bright apse.\n- Camera Room: cool and dark, with one amber safelight pool.\n- Wing: pale, no candles.\n- Workshop: the clearest light (a neutral-cool key, start #DCE3F0 at 0.45 or less).\n- Study: reads unlit. StudyLit raises the key by 0.18 and lowers fog density from 0.028 to 0.020 over 2 s.\nGates, measured with mud_metric on lights-off TourShots at every walk spot:\n- mud 0.35 or less;\n- ceiling-band mud 0.25 or less;\n- cool shadow 0.30 or more.\nWith pools on, the warm share is 10-35%.",
+   "rationale": "m-red-hostile measured 0.69-0.76 mud today, and the draft's hue gate passes those frames (0.27-0.30 against a 0.40 cap). SunColor is the directional key on every lit surface (ZoneMood.cs:90). manor-refs: keep the fill cool and leave orange to the falloff.",
+   "servesBeat": [
+    "1",
+    "2",
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Draft mood table: warm suns (#FFB46A at 0.72, #FFC47A at 0.62)",
+    "WS-D07: Workshop #FFE6C2 at 0.70, Study #FFA65A at 0.42"
+   ],
+   "budgetImpact": "Shader globals only: 0 batches, 0 tris."
+  },
+  {
+   "id": "M-D013",
+   "topic": "Candle hierarchy and Ultra lights",
+   "choice": "Real LocalLights go only on:\n- chandeliers;\n- the two door candelabras at the Gallery entries;\n- the Workshop lanterns;\n- the Study hearth and desk candle.\nEach zone has at most 8 registered candidates. Doors are padless, so pads add none.\nFixtures:\n- one 12-candle chandelier per room, in its first view; any others are 7-candle single rings;\n- above each frame, a two-candle girandole about 0.35 m up (a shader pool, no LocalLight);\n- on each plinth, two candle cups (pools);\n- sconces only at doors, with no light;\n- no electric picture lights;\n- never an Ultra twin on a chandelier ring.\nLight candidates per room:\n- Foyer: 4\n- Gallery: 5\n- Hall: 4\n- Camera Room: 3\n- Wing: 2 (cool)\n- Workshop: 3\n- Study: 2",
+   "rationale": "m-red-detail: the Gallery registers 25 lights today, and candle fixtures are 23.6% of its tris. UltraFx switches on the nearest 8 within 26 m, so extra candidates pop on and off as the visitor walks.",
+   "servesBeat": [
+    "1",
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Draft M-D013: one candelabra per exhibit (still about 14-16 candidates)"
+   ],
+   "budgetImpact": "Gallery about -1.5k tris. Light candidates drop from 25 to 5."
+  },
+  {
+   "id": "M-D014",
+   "topic": "Shader light pools on every tier",
+   "choice": "Kept from the draft. up/palette adds 8 global pools to FlatToon (toon-banded, applied before fog), fed by Look/ManorGlow:\n- nearest N per tier: Low 4, Medium and High 8, Ultra 8 minus the active real lights;\n- flicker ±8% at 6-8 Hz; under reduced motion, breathing only (±3% below 0.5 Hz).\nAdded pool kinds:\n- safelight: amber, no flicker;\n- sweep: the DECA response.\nFallback: emissive flames plus moods.",
+   "rationale": "Below Ultra nothing lights anything today, and most visitors never reach Ultra.",
+   "servesBeat": [
+    "1",
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Decals or vertex-colour pools (rejected)"
+   ],
+   "budgetImpact": "0 batches and 0 tris. GPU about 8 x 20 ALU per pixel (est.); Low tier pools on vs off must stay within 1.0 ms."
+  },
+  {
+   "id": "M-D015",
+   "topic": "Materials request and wall field",
+   "choice": "up/palette appends:\n- Gilt 24 (metal ramp);\n- Marble 25 (+ Pat.Marble 18);\n- Velvet 26 (sheen);\n- Flame 27;\n- Silver 28 (camera monument and silver medals).\nEach adds +1 batch in every zone that uses it.\nUsage rules:\n- Velvet ships only if it replaces every TextileRed use in the pf.* zones.\n- Gilt goes only on relief edges (frames, cornice lip, chandeliers), at most 10% of the visible wall.\n- Brass stays for plaques, markers, fillets and the accent.\nGallery and Foyer walls are ivory Plaster above the walnut dado (0 new Mats), unless the three-swatch test (Cyanotype, crimson, ivory under pools, scored with mud_metric) picks another.\nGlass and Crystal are deferred.",
+   "rationale": "m-red-detail: Mat swaps are additions, not replacements. m-red-hostile F8: the Cyanotype lattice turns grey-teal under candlelight (measured #3E5858). manor-refs rule 5.",
+   "servesBeat": [
+    "3",
+    "4"
+   ],
+   "decidingRole": "M-Manager (Lead A signs off on finishes)",
+   "alternatives": [
+    "Draft: Gilt and Velvet as replacements; a plain Cyanotype wall",
+    "m06: Glass with Pat.Glint now"
+   ],
+   "budgetImpact": "+1 to +4 batches per zone (est.)."
+  },
+  {
+   "id": "M-D016",
+   "topic": "Flames",
+   "choice": "Kept from the draft: every candle top becomes an outer 6-sided Flame cone (r 0.022 m, h 0.09 m) around the Warm core. No billboard cards and no moving flame meshes.",
+   "rationale": "Today every flame is a single prism (ManorKit.cs:25). A billboard card would need a runtime component per flame.",
+   "servesBeat": [
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Billboard cards (cut)"
+   ],
+   "budgetImpact": "+1 batch per zone (Flame), about 10 tris per cone."
+  },
+  {
+   "id": "M-D017",
+   "topic": "Camera feature set",
+   "choice": "Kept from the draft:\n- five primes: 16, 28 (default), 50, 85 and 135 mm; ViewFovFor keeps 70 degrees at the default;\n- in camera mode: wheel = lens, Q/E = aperture, F = film;\n- five film looks named per D-006 (Standard, Candle, Vivid, Mono, Cyanotype), baked into the print;\n- the print develops over 2.4 s;\n- capture-time DoF comes last.\nAdded:\n- D-008 protection through the up/lens PhotoHolder place-guard hook. Place is refused in pf.foyer, pf.gallery, pf.honours, pf.workshop and pf.study, with a prompt line, and allowed in pf.lens and pw.*.\n- The X-T5 viewmodel uses M-C8's LOD of at most 2.5k tris, with the real lettering (D-011). It falls back to Geo primitives until that LOD exists.",
+   "rationale": "Owner camera asks, plus D-006, D-008 and D-011. The 50-degree pins hold.",
+   "servesBeat": [
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Exposure triangle, zoom, live DoF (cut)"
+   ],
+   "budgetImpact": "Viewmodel at most 2.5k tris, outside zone budgets. Print: 2 draws while visible."
+  },
+  {
+   "id": "M-D018",
+   "topic": "Onboarding and identity at the thresholds (gate G0)",
+   "choice": "The loader restyle ships first (G0):\n- candlelit, with the [ ] monogram and the owner's name;\n- three control rows (walk, look, use) plus 'Esc steps back out';\n- two buttons: 'Enter the Manor' and 'Go straight to the Grand Gallery';\n- 'Read everything as a page' is the first focusable item;\n- removed: the graph paper, the '[project]ion' title, the 12-row controls wall and 'Built with Unity'.\nThe skip uses the fork's travel request, so no seam is needed.\nIn the world:\n- The owner's name is lettered on the Foyer far-wall frieze (cap height at least 0.6 m, about 21 px at spawn) and on the frieze of the Gallery's cross-arch A (at least 0.45 m, about 23 px at 14 m). Both reach at least 4.5:1 with the lights off.\n- A 116-tri [ ] medallion sits on the Foyer runner at z 7 (top at y 0.035 or higher, never coplanar). It replaces the two spawn pedestals.\n- No plaque wraps mid-word (a test checks this).",
+   "rationale": "m-red-hostile F7: the live loader shows another project's identity, and the name plaque wraps mid-word at knee height. m-red-detail: medallions only at viewpoints.",
+   "servesBeat": [
+    "1"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Draft: loader inside M-C5 with no gate; a 'monogram stele slot'",
+    "m-red-hostile: a monogram inlay at every spawn"
+   ],
+   "budgetImpact": "0 Unity cost for the loader. Friezes cost 1 canvas each. The medallion is 116 tris, 0 batches."
+  },
+  {
+   "id": "M-D019",
+   "topic": "Overlay architecture and accessibility",
+   "choice": "Kept from the draft: one window.ionOverlay module with an exclusive slot behind the jslib API, holding the wall label, the 'Plan of the house' and the arcade bezel. Defaults sit under :where(:root), so the site tokens win.\nChanges:\n- The plan lists all 7 rooms, Grand Gallery first.\n- The Study bureau opens the contact label.\n- Robot and CAD project labels add 'See it in the Workshop' (map travel).\n- The OS reduced-motion preference seeds Feel.ReducedMotion.",
+   "rationale": "Three overlays would otherwise fight over Esc and focus.",
+   "servesBeat": [
+    "2",
+    "3",
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Unity-drawn panels"
+   ],
+   "budgetImpact": "0 batches."
+  },
+  {
+   "id": "M-D020",
+   "topic": "Streaming load classes",
+   "choice": "Eager: the core six, Foyer, Gallery and Camera Room.\nLazy: Hall, Wing, Workshop and Study. None of them registers a diorama shot, because the Gallery owns their door prints.\nUnloadable: pw.*, under the pin rule.\nThe core six stay Eager, since they own diorama shots that phase-1 streaming forbids in streamed rooms.",
+   "rationale": "M-D020 phase-1 rule (shots only in Eager rooms). WorldHistory keeps a single checkpoint.",
+   "servesBeat": [
+    "1",
+    "3",
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "m-red-hostile F12: make the core six Lazy for Manor entries (deferred)"
+   ],
+   "budgetImpact": "Boot builds 4 fewer zones once streaming lands (est.)."
+  },
+  {
+   "id": "M-D021",
+   "topic": "Seam order",
+   "choice": "One Seams crew, one seam at a time:\n1. up/lens, plus the PhotoHolder place-guard hook;\n2. up/palette, plus Silver 28;\n3. up/zone-streaming;\n4. up/manor-ux, plus an optional label font;\n5. up/web-diet.",
+   "rationale": "up/lens is on G's critical path and already edits PhotoHolder. up/palette unblocks the look and the materials. No crew waits on streaming.",
+   "servesBeat": [
+    "4"
+   ],
+   "decidingRole": "M-Manager (orchestrator confirms)",
+   "alternatives": [
+    "m12: streaming before lens"
+   ],
+   "budgetImpact": "None directly."
+  },
+  {
+   "id": "M-D022",
+   "topic": "Budgets and evidence",
+   "choice": "Seven-zone design caps under the frozen 120 / 60k (batches = audited renderers + world-space Canvas count):\n- Foyer: 85 / 24k\n- Gallery: 80 / 44k\n- Hall: 90 / 45k\n- Camera Room: 85 / 40k\n- Wing: 55 / 25k\n- Workshop: 75 / 30k\n- Study: 60 / 20k\nAt most 8 registered LocalLight candidates per zone.\nUltra twins count on every tier, so Ultra-only detail is Brass/Gilt (+1 batch once per zone) or Trim (+0).\nEvery PR carries TourShots PNG + JSON (Low, Ultra, lights-off; pools-off after up/palette) at its head SHA.",
+   "rationale": "The audit counts enabled MeshRenderers only (ArchBake.cs:130-132), so plaque canvases are invisible to it, while Ultra twins hidden with forceRenderingOff still count (GameBootstrap.cs:386-389). Measured baselines: Foyer 73 / 18,664, Gallery 63 / 40,292.",
+   "servesBeat": [
+    "3",
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Draft: five caps; '8 enabled lights'"
+   ],
+   "budgetImpact": "Defines the budget."
+  },
+  {
+   "id": "M-D023",
+   "topic": "Folder split, ownership and contracts",
+   "choice": "Assets/Portfolio/Runtime/ splits into:\n- Registry/ and Content/;\n- Rooms/ with Core/, Foyer/, Gallery/, Honours/, CameraRoom/, Wing/, Workshop/ and Study/;\n- Exhibits/, Authored/, Camera/, Look/, Overlay/ and Streaming/;\n- PaintingWorlds/ with Look/, StarryNight/ and Portals/.\nAssets/Portfolio/Models/ is added, plus a Tests/EditMode asmref.\nM-F seeds every folder with .meta files and compiling stubs. After that the globs are disjoint.\nStubbed contracts:\n- HeroKit (+ExplodeSpec)\n- AuthoredHero.TryBuild\n- ExhibitUsable.Attach(..., onRead)\n- ManorGlow.Register\n- RoomLighting.Light\n- CameraRoomKit.Furnish\n- ManorDoor.Build\n- DoorPrint.Hang\n- HallSet.ApseBay\n- WorkshopSet.StatueBay\n- PaintingWorldRegistry.Register\n- ZoneLoads",
+   "rationale": "Seven rooms and two new crews (M-C7, M-C8) need disjoint globs, so no crew ever edits another crew's file.",
+   "servesBeat": [
+    "3",
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Draft: one Rooms/** glob"
+   ],
+   "budgetImpact": "None."
+  },
+  {
+   "id": "M-D024",
+   "topic": "Door kit: architraves, not pods",
+   "choice": "ManorDoor (Rooms/Core) is built from:\n- a Niche opening 2.4 x 4.2 m (3.2 x 4.8 m for the Foyer's Gallery door), 0.5 m deep, lined in Graphite;\n- a Walnut casing with a Brass fillet;\n- a lettered lintel (1 canvas);\n- the public Ion.Gameplay.Teleporter component on a fork GameObject at the threshold. Its trigger is 1.6 x 2.4 x 1.6 m, centred 0.8 m in front of the wall face. It keeps the Frost fade and the photo-copy registry.\nThere is no PropKit teleporter pad and no pad LocalLight.\nRed drapes hang on every [ GRAND GALLERY ] door except the Wing's.\nOnly each room's final Teleport is a Solution.",
+   "rationale": "m-red-hostile F5: the pods read as sci-fi elevator booths. m-red-detail: a pad costs about 6 batches, 1 light and 1 canvas. Teleporter is a standalone MonoBehaviour that adds its own trigger and Interactable (Teleporter.cs:62-83).",
+   "servesBeat": [
+    "1",
+    "2"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Keep the pods",
+    "m-red-hostile: a photograph inside every opening (Eager targets only)"
+   ],
+   "budgetImpact": "About -6 batches and -1 light candidate per door (est.). Foyer about -12, Gallery about -12."
+  },
+  {
+   "id": "M-D025",
+   "topic": "Door prints: the Manor signature",
+   "choice": "Two at launch, both in the Gallery's bay 3:\n- a 1.6 x 1.2 m Polaroid PictureFrame beside the Hall door and another beside the Workshop door, centre y 2.75;\n- each is bound to a DioramaShot registered by the Gallery.\nThe Gallery builds each set in its own DioramaRoot with the target crew's shared builder (HallSet.ApseBay or WorkshopSet.StatueBay).\nEach set is walled, so its shot sees nothing else.\nEach shot is captured from the target room's arrival pose (eye 1.62 m, 50 degrees, 4:3), and arrival equals that pose: a test checks within 0.05 m and 0.5 degrees.\nThe Camera Room door stays plain.\nThe prints are cut position 8.",
+   "rationale": "WS-D04 plus m-red-hostile F5 and F6: Viewfinder-style photo magic lands on the 60-second path with nothing pasted, and D-008 holds. Shots stay in Eager rooms (M-D020). PrintCard binds late (PrintCard.cs:70-75).",
+   "servesBeat": [
+    "2",
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "m-red-hostile: render a photograph into every doorway at boot",
+    "No prints (plain doors)"
+   ],
+   "budgetImpact": "+2 PrintCard batches in the Gallery. The replica sets total at most 4k tris in the diorama; that they are not audited needs verifying. +2 captures at boot."
+  },
+  {
+   "id": "M-D026",
+   "topic": "Workshop",
+   "choice": "Built per WS-D03, D05, D07, D09 and D10. Inner size 14 x 16 x 7 m.\nArrival and viewpoint:\n- Arrival is the brass [ ] viewpoint medallion at (0,0,-1.5), yaw 0. It is a ManorKit medallion, not PropKit.StandingMarker, so no art-bible §7.5.2 exception is needed.\n- The anamorphic robot is scaled about the eye E = (0, 1.62, -1.5) by p' = E + k(p - E), with k from 0.68 to 1.16; the tower and base keep k = 1.\nThe robot:\n- Base centre at (0, 0.8, 8.0), on a 0.5 m plinth and a 0.3 m Solid dais (x ±1.75, z 4..10).\n- Brass trail rods.\n- A rope line 1.5-2.0 m out.\nRoom contents:\n- a Cyanotype blueprint backdrop;\n- CAD bays on the west wall, built from a list (2 at launch, up to 3);\n- an oak bench with a shadow board and calipers;\n- an 'on the bench' slot;\n- 3 six-candle lanterns (the key light at (0, 5.0, 3.5), about 36 degrees above the face).\nExit: the [ GRAND GALLERY ] door at (-2.25, 0, -3.0).\nMood: the clearest neutral-cool key (M-D012).",
+   "rationale": "D-003 puts the robot here. The anamorphic statue rewards curiosity at no extra batch cost (measured in the WS JS model: 0 px shift from the inlay, 0.92 degrees at 0.30 m off it).",
+   "servesBeat": [
+    "2",
+    "3",
+    "4"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "m05 vertical explode (fallback, cut position 7)"
+   ],
+   "budgetImpact": "Cap 75 / 30k, estimate about 50 / 15k. At most 4 light candidates."
+  },
+  {
+   "id": "M-D027",
+   "topic": "Study",
+   "choice": "Built per WS-D06, D07, D09 and D10. Inner size 10 x 14 x 4.5 m. Arrival (0,0,-2).\nOne axis runs through the room:\n- a red runner;\n- a Walnut bureau at (0, 0, 5.6) with the letter and desk candle;\n- a Limestone hearth on the far wall, with Flame cones and a mantel at 1.25 m;\n- a portrait slot at (0, 2.6, 9.5): a Frost [ ] slide until the owner supplies one.\nAround it:\n- Oak bookcases on both walls; up to 5 face-out chapter books on the west case (3 at launch).\n- A lectern with 'Read everything as a page' at (3.4, 0, -1.0).\n- The [ GRAND GALLERY ] door at (2.25, 0, -3.0).\nThe letter:\n- E at the letter opens the contact label, lights the desk candle and blends to StudyLit over 2 s (instant under reduced motion).\n- Restart unlights the room.\nNo photo trick here.",
+   "rationale": "D-003 gives the Study the about and contact content. m01's lit-candle moment returns. Restraint provides the contrast after the Workshop and the Hall.",
+   "servesBeat": [
+    "1",
+    "3"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Contact on a Foyer bureau (draft)"
+   ],
+   "budgetImpact": "Cap 60 / 20k, estimate about 38 / 10.5k. 2 light candidates."
+  },
+  {
+   "id": "M-D028",
+   "topic": "Room detail rules",
+   "choice": "- Pass one Niche Opening per frame and one across the Hall apse backdrop to Arch.Wall, so the 3.0 m string course stops at every frame.\n- Plaque centres at 1.5 m, at the frame's lower right, at least 0.03 m above the rail top.\n- Rope lines only at the DECA and the robot: Soft, with one collider box.\n- Drapes only on [ GRAND GALLERY ] doors.\n- A fireplace only in the Study.\n- No dentils.\n- Medallions only at viewpoints: Foyer spawn, Hall arrival, Workshop arrival.\n- 4 Foyer columns, at the carpet's end.\n- Plinth bodies Soft, with a collider box.",
+   "rationale": "m-red-detail: the most value per triangle, plus the string course that today runs through every painting (Arch.cs:318-330).",
+   "servesBeat": [
+    "1",
+    "2",
+    "3"
+   ],
+   "decidingRole": "M-Manager",
+   "alternatives": [
+    "Dentils (6k tris)",
+    "Electric picture lights"
+   ],
+   "budgetImpact": "Niches about 480 tris in the Gallery. Ropes about 524 tris each. Columns about -288 tris. Each item is 0 batches."
+  },
+  {
+   "id": "M-D029",
+   "topic": "Crew model policy",
+   "choice": "Every M crew, red-team seat and gate agent spawned from this plan runs on Opus 5.5 at xhigh effort, replacing Sonnet 5.5 for subagents.",
+   "rationale": "The owner's relayed instruction for this run: 'start using opus 5.5 models for any subagents on xhigh since it's more cost effective than the current sonnet 5.5'.",
+   "servesBeat": [
+    "3",
+    "4"
+   ],
+   "decidingRole": "owner (relayed), recorded by M-Manager for the orchestrator",
+   "alternatives": [
+    "Sonnet 5.5 for crews"
+   ],
+   "budgetImpact": "None in-engine."
+  }
+ ],
+ "conflicts": [
+  {
+   "between": [
+    "m-ws-designer",
+    "m-red-hostile",
+    "m-red-detail"
+   ],
+   "issue": "Where the Study and Workshop doors go, and their registry orders. WS: Study off the Foyer, Workshop off Gallery bay 3, orders 1050/1060. Hostile: both off the Gallery, orders 1015/1035. Red-detail: at most 4 Gallery pads, so the doors go off the Hall or the Foyer.",
+   "resolution": "Adopt WS: the Study door on the Foyer triptych, the Workshop door on the Gallery's bay-3 east wall, orders appended (1050/1060). The Gallery ends up with exactly 4 doors.",
+   "ruleApplied": "5 (serves beat 3 more directly: contact is visible from spawn) then 6 (no index shift, fewer changes)"
+  },
+  {
+   "between": [
+    "m-red-hostile F4",
+    "m-red-detail",
+    "draft M-D010"
+   ],
+   "issue": "How the heroes are built: Blender heroes at 6-10k tris, versus a 2.5k cap on the camera monument, versus 'Blender waits'.",
+   "resolution": "Authored convex-part heroes at up to 8k tris and 4 batches each (M-C8). The code-built HeroKit ships first and stays as the fallback.",
+   "ruleApplied": "1 owner-voice ('model a some absolutely huge things with extreme detail that is performance friendly ... blender mcp')"
+  },
+  {
+   "between": [
+    "m-red-hostile F10",
+    "draft M-D009"
+   ],
+   "issue": "Physical responses on exhibits, versus 'one verb, no motion'.",
+   "resolution": "E reads, plus one short physical response per exhibit class. All of them switch off under reduced motion.",
+   "ruleApplied": "North-star check words (tactile, playful) apply to every decision; 'less motion' is only the rule-6 tie-break"
+  },
+  {
+   "between": [
+    "m-red-hostile F2",
+    "m-ws-designer WS-D07",
+    "draft M-C4 mood table"
+   ],
+   "issue": "Warm interior suns (#FFE6C2 at 0.70, #FFA65A at 0.42, #FFB46A at 0.72) versus a cool dim key.",
+   "resolution": "A cool key in every room (#8E9CC8 at 0.25 or less; the Workshop gets a neutral-cool #DCE3F0 at 0.45 or less). Warm light only from flames, pools and lights. Mud gates replace the hue gate.",
+   "ruleApplied": "1 owner-voice ('dim candles') plus measured evidence (mud 0.69-0.76)"
+  },
+  {
+   "between": [
+    "m-red-hostile F8",
+    "draft M-D004",
+    "m01"
+   ],
+   "issue": "Wall field: ivory stucco versus a plain Cyanotype field versus a sequence of colours.",
+   "resolution": "Ivory Plaster in the Gallery and the Foyer by default. A three-swatch TourShot test scored with mud_metric decides before M-C4 locks the styles. The other rooms follow WS-D07 and M-D012.",
+   "ruleApplied": "5 (whichever serves a beat more directly), decided by measurement"
+  },
+  {
+   "between": [
+    "m-red-hostile F3",
+    "draft M-D005"
+   ],
+   "issue": "Gallery size and frame scale.",
+   "resolution": "10 x 48 x 7.5 m. Bay-1 works at 4.2 x 3.15 m; all others at 3.2 x 2.4 m with alternating hang heights.",
+   "ruleApplied": "1 owner-voice ('overly large as if they were statues')"
+  },
+  {
+   "between": [
+    "m-red-hostile F5",
+    "m-ws-designer WS-D04",
+    "m-red-detail device costs"
+   ],
+   "issue": "Door form: a photograph inside every opening (Eager targets only), versus a Polaroid beside the door, versus a pad costing about 6 batches.",
+   "resolution": "Padless architrave doors everywhere (fork Teleporter component, no pad). Polaroid door prints beside the Gallery's Hall and Workshop doors, built from replica sets in the Gallery's DioramaRoot.",
+   "ruleApplied": "5 then 6 (less code, fewer batches)"
+  },
+  {
+   "between": [
+    "m-red-hostile F6",
+    "D-008 (proposed)",
+    "draft delete list"
+   ],
+   "issue": "A camera stand at Gallery bay 1, and the Camera Room on the delete list.",
+   "resolution": "The Camera Room comes off the delete list. No camera in the Gallery: D-008 protects it, and a camera you cannot paste with frustrates. The door prints carry the photo magic on the main path.",
+   "ruleApplied": "3 (D-008 default stands) then 5"
+  },
+  {
+   "between": [
+    "m-red-hostile F9",
+    "draft",
+    "m-red-detail cap table"
+   ],
+   "issue": "Hall and Wing sizes and caps.",
+   "resolution": "Hall 16 x 18 x 9 with arrival on the inlay, cap 90 / 45k. Wing 12 x 14 x 7, cap 55 / 25k.",
+   "ruleApplied": "5 (rooms sized to launch content read as finished)"
+  },
+  {
+   "between": [
+    "m-red-hostile F7",
+    "m-red-detail medallions"
+   ],
+   "issue": "A monogram inlay at every spawn, versus only two medallions.",
+   "resolution": "Medallions only at viewpoints (Foyer spawn, Hall arrival, Workshop arrival). The owner's name in the architecture (Foyer and Gallery friezes) carries identity elsewhere.",
+   "ruleApplied": "6 (delete before adding); the hostile's intent is still met"
+  },
+  {
+   "between": [
+    "m-ws-designer WS-D03",
+    "art bible 7.5.2"
+   ],
+   "issue": "Reusing the brass standing marker as a viewpoint would need an art-bible exception.",
+   "resolution": "Use the ManorKit [ ] medallion as the viewpoint mark. The standing marker keeps its Place/Snap meaning, so no exception is needed.",
+   "ruleApplied": "3 (art-bible limits) then 6"
+  },
+  {
+   "between": [
+    "D-011 (locked)",
+    "draft M-C1 'the real FUJIFILM and X-T5 lettering (D-011), silver and black (D-014)'"
+   ],
+   "issue": "Lettering on the camera monument.",
+   "resolution": "The real FUJIFILM and X-T5 lettering is modelled as geometry on the monument and the viewmodel (M-C8). The [ ] monogram appears only on the strap or the print.",
+   "ruleApplied": "3 locked decision"
+  },
+  {
+   "between": [
+    "draft M-D007",
+    "m-red-hostile F2"
+   ],
+   "issue": "Camera Room: a warm darkroom with brown fog, versus cool and dark with a red safelight.",
+   "resolution": "Cool and dark, with one amber safelight pool #E39B2B (the shared accent), which ties the room to the Front Door's Darkroom.",
+   "ruleApplied": "3 (D-001 and D-002 identity)"
+  },
+  {
+   "between": [
+    "Front Door spring table (k/c)",
+    "Manor Feel (f/zeta)"
+   ],
+   "issue": "D-002 calls for one spring table, but the two tables differ: Front Door settle 110/11 is 1.67 Hz / 0.52, Manor settle is 2.6 / 0.82.",
+   "resolution": "Manor fork motion uses the shared table (lens click = snap, medal swing = soft, print eject = settle). Upstream Feel Raise/Sway stay as game feel. Escalated to the orchestrator.",
+   "ruleApplied": "3 (D-002), with 7 the orchestrator logging the decision"
+  },
+  {
+   "between": [
+    "draft M-D003 (pf.world.*)",
+    "G plan G-D008 (pw.starry)"
+   ],
+   "issue": "Painting World key prefix.",
+   "resolution": "Use pw.* from order 1100, so worlds take index 13 and up.",
+   "ruleApplied": "4 (G owns worlds)"
+  },
+  {
+   "between": [
+    "m-ws-designer WS-D10",
+    "non-overlapping globs"
+   ],
+   "issue": "The new door tests were proposed inside ManorTests.cs, which M-C2 owns.",
+   "resolution": "They live in M-C7's WorkshopStudyTests.cs instead.",
+   "ruleApplied": "Ownership protocol"
+  }
+ ],
+ "crossTrack": [
+  "Model policy (the owner's request, relayed by the harness this run): spawn every M crew, red-team seat and gate agent from this plan on Opus 5.5 at xhigh effort, replacing Sonnet 5.5 for subagents. The orchestrator applies this; I cannot change config.",
+  "Identity, accent (D-002):\n- In the world: Mat.Brass #C59A45.\n- In the DOM: --ion-accent is the Front Door's amber #E39B2B, which measures 8.1:1 on darkroom #14100E and 7.72:1 for ink on amber, but only 2.14:1 on print paper, so it is never used as text on paper.\n- The Camera Room's safelight pool reads the accent from identity.json.",
+  "Bridging typeface: the D-001 direction names Bricolage Grotesque (OFL). The Manor's DOM overlays use it now. In-world plaques need the optional label-font slot in up/manor-ux, which defaults to Nunito so existing labels are unchanged. The orchestrator confirms this in tokens.json.",
+  "Spring table: the Front Door publishes (k, c) at mass 1:\n- snap 520/34 = 3.63 Hz / 0.745;\n- soft 170/15 = 2.08 Hz / 0.575;\n- settle 110/11 = 1.67 Hz / 0.524.\nManor fork motion consumes these: lens click = snap, medal swing = soft, print eject = settle. Upstream Feel Raise (2.6/0.82) and Sway (1.8/0.75) stay as game feel. The orchestrator logs this.",
+  "Develop time: the Manor print develops in 2.4 s, and the Front Door must-fix asks for a readable hero print within about 2.5-3 s. Proposal: one shared --ion-develop token.",
+  "Content schema v2 adds workshop.json (robot HeroSpec, cad[0..3], bench[0..1]) and study.json (contact, chapters[0..5], portrait). Everything stays JsonUtility-compatible. docs/portfolio/agents/owner-facts.md must be mirrored into the fork before any real content lands.",
+  "Art bible / Lead A:\n- Rule on whether owner project covers count as photo previews. Recommendation: yes, up to 8 at 512x384 or less through PrintCard; otherwise frames stay Frost slides.\n- Sign off the Gilt metal-ramp and Velvet sheen finishes, the pools, and Silver 28.\n- No exception is needed for viewpoint inlays: they are medallions.",
+  "G interface:\n- Worlds register as pw.* from order 1100, so index 13 and up, x 650 and up.\n- Wing portal anchors: with 1 world the portal sits on the far wall axis; worlds 2-3 use side slots (left z 2.0, right z 5.5).\n- Exits land at their Wing frame (G-C3) or, for the pilot, in the Gallery.\n- M owns the PhotoHolder place-guard for D-008; worlds allow placement.",
+  "Budgets doc: add the 7-row caps, the rule that world canvases count as batches, and the rule of at most 8 registered light candidates to budgets.md. The first Manor visit measures 18.0 MB.",
+  "Release:\n- publish.ps1 needs the compose-time injection hook for site/manor-overlay/**.\n- The link check covers the new aliases (honours, hall, lens, camera-room, wing, workshop, robot, cad, study, about, contact).\n- MCP for Unity is stripped from release builds.",
+  "W bridge: the Darkroom handoff print should use a real Grand Gallery capture (M-QA's Gallery spawn TourShot at the integration SHA), never an AI image. Prefetch the wasm and data on 'Enter the Manor' intent.",
+  "North-star signature (proposal for the orchestrator): 'You enter every hero room through its own photograph.' The print beside the door is taken from the brass mark you land on.",
+  "Lock docs: register the new globs in ownership.json: Rooms/{Core,Foyer,Gallery,Honours,CameraRoom,Wing,Workshop,Study}, Authored, Models, scripts/fork/blender, Tests/PlayMode/Tour and Guards, scripts/fork/mud_metric.py.",
+  "Sound: the Manor still falls through to the game's rooms.ogg (2.2 MB). It needs its own candlelit ambience or silence. This is owned by W-sound or the orchestrator."
+ ],
+ "deps": [],
+ "budgets": [
+  "Hard limits per zone (frozen, ArtPlayTests): at most 120 batches and 60,000 tris. Batches here count audited MeshRenderers plus world-space Canvases; the M-QA guard adds the canvases.",
+  "pf.foyer: cap 85 / 24k, at most 8 registered lights (plan: 4). Measured 73 / 18,664 today with 2 pods and 6 canvases. Estimate after this plan: about 62 mesh batches + 6 canvases.",
+  "pf.gallery: cap 80 / 44k, at most 8 lights (plan: 5). Measured 63 / 40,292 today with 11 canvases. Estimate: about 55 mesh batches + 15 canvases; about 36k tris (m-red-detail projection).",
+  "pf.honours: cap 90 / 45k, at most 8 lights (plan: 4). Estimate only. Medal devices take at most 2 Mats each.",
+  "pf.lens (Camera Room): cap 85 / 40k, at most 8 lights (plan: 3). Pickups take at most 2 Mats each. Estimate only.",
+  "pf.wing: cap 55 / 25k, at most 8 lights (plan: 2, cool). Estimate only.",
+  "pf.workshop: cap 75 / 30k, at most 4 light candidates. Estimate about 50 / 15k (WS-D08).",
+  "pf.study: cap 60 / 20k, at most 3 light candidates. Estimate about 38 / 10.5k (WS-D08).",
+  "pw.starry (G): at most 90 batches / 20k tris and 4 lights (G-D011).",
+  "Per hero: authored at most 8,000 tris and 4 batches with no Ultra twins. Code fallback: DECA 4 / 850, gantry 4 / 2.5k, camera 2 / 2.1k, robot 2 / 1.4k. X-T5 viewmodel at most 2,500 tris, outside zone budgets.",
+  "Per door: padless, 0 device batches, 1 lintel canvas (the Foyer's side doors carry 2). A door print adds 1 PrintCard batch to its source room. The replica sets total at most 4k tris in the Gallery diorama (est.; verify they are not audited).",
+  "Ultra-only detail: Brass/Gilt costs +1 batch once per zone and Trim +0. Ultra twins count on every tier, so they never count as budget relief.",
+  "Each new Mat in a zone costs +1 batch: Gilt, Marble, Velvet (net 0 only as a full TextileRed swap), Flame, Silver.",
+  "GPU: pools on vs pools off on Low must stay within 1.0 ms at 1080p, otherwise Low falls back to emissive flames only. Every Place stays within 25 ms (art bible).",
+  "Routes at 4.5 m/s (M-QA): fast path (Foyer, Gallery bay 1, the Workshop print, the Workshop inlay) within 60 s, modelled at 34 s. Everything path (Study bureau, 8 frames, Workshop, Hall at maximum, Camera Room) within 180 s, modelled at 145 s.",
+  "Download: the first Manor visit measures 18.0 MB (gzip); up/web-diet saves about 2.8 MB raw. Each authored hero FBX is 2 MB or less in the repo, about 0.6 MB or less in Web.data (est.).",
+  "Boot: +2 diorama captures for the door prints. Streaming target: a Lazy room's first build within 300 ms, hard cap 500 ms."
+ ],
+ "tokens": {
+  "source": "tokens.json (owned by W) is synced by sync-content to Assets/Portfolio/Resources/Portfolio/identity.json for the Unity side. The DOM overlays (loader, wall label, plan, arcade bezel) read CSS custom properties, with Manor defaults under :where(:root) so the site's values win. The values below are the Manor's defaults until tokens.json lands.",
+  "colour": {
+   "--ion-accent": {
+    "value": "#E39B2B",
+    "use": "DOM fill and stroke only, ink text on it (7.72:1). On #14100E: 8.1:1. Never as text on paper (2.14:1)."
+   },
+   "--ion-brass": {
+    "value": "#C59A45",
+    "use": "Mat.Brass reference; 1 px label rules, crop marks, the [ ] brackets on dark (7.28:1 on #14100E)"
+   },
+   "--ion-ink": {
+    "value": "#13171A",
+    "use": "wall-label text (16.5:1 on paper)"
+   },
+   "--ion-paper": {
+    "value": "#F6F5F1",
+    "use": "wall-label ground (print paper)"
+   },
+   "--ion-darkroom": {
+    "value": "#14100E",
+    "use": "loader ground and scrim base"
+   },
+   "--ion-scrim": {
+    "value": "rgba(20,16,14,0.72)",
+    "use": "behind the label sheet; the scene stays visible"
+   },
+   "--ion-wood-1": {
+    "value": "#3B2418",
+    "use": "arcade bezel walnut"
+   },
+   "--ion-wood-2": {
+    "value": "#5A3A26",
+    "use": "bezel highlight"
+   },
+   "--ion-focus": {
+    "value": "var(--ion-accent) on dark, var(--ion-ink) on paper",
+    "use": "2 px focus ring, at least 3:1 non-text contrast"
+   },
+   "inWorld": {
+    "safelightPool": "--ion-accent read from identity.json, Camera Room pool colour",
+    "brass": "Mat.Brass is fixed by Palette.cs; tokens never recolour Mats"
+   }
+  },
+  "type": {
+   "--ion-font-display": {
+    "value": "'Bricolage Grotesque', system-ui, sans-serif",
+    "use": "label titles, loader name, plan headings (D-001 bridging face)"
+   },
+   "--ion-font-ui": {
+    "value": "'Bricolage Grotesque', system-ui, sans-serif",
+    "use": "buttons, body copy"
+   },
+   "--ion-font-mono": {
+    "value": "'Geist Mono', ui-monospace, monospace",
+    "use": "exhibit numbers ('03') and [PLACEHOLDER] captions only"
+   },
+   "scale": {
+    "labelTitle": "32/36",
+    "labelMeta": "14/20 mono",
+    "labelBody": "17/26 (at least 16 px)",
+    "loaderName": "clamp(40px, 6vw, 72px)"
+   },
+   "inWorld": "Nunito (UIUtil.cs) until the up/manor-ux label-font slot exists; then the bridging face"
+  },
+  "space": {
+   "--ion-rise": "8px",
+   "--ion-gap": "8px base step (8, 16, 24, 32, 48)",
+   "labelSheetWidth": "440px",
+   "hitTarget": "at least 24 px (WCAG 2.2 2.5.8); primary buttons 44 px"
+  },
+  "radius": {
+   "--ion-radius": "2px (prints and labels are square-cut; no pill shapes)"
+  },
+  "motion": {
+   "springs": {
+    "snap": {
+     "k": 520,
+     "c": 34,
+     "freqHz": 3.63,
+     "zeta": 0.745,
+     "manorUse": "lens mount click, shutter press"
+    },
+    "soft": {
+     "k": 170,
+     "c": 15,
+     "freqHz": 2.08,
+     "zeta": 0.575,
+     "manorUse": "medal swing"
+    },
+    "settle": {
+     "k": 110,
+     "c": 11,
+     "freqHz": 1.67,
+     "zeta": 0.524,
+     "manorUse": "print eject and hang"
+    }
+   },
+   "upstreamGameFeel": {
+    "raise": "2.6 Hz / 0.82 (k 266.9, c 26.79)",
+    "sway": "1.8 Hz / 0.75 (k 127.9, c 16.96)",
+    "note": "Feel.cs constants are not identity tokens and stay unchanged"
+   },
+   "durations": {
+    "--ion-in": "220ms",
+    "--ion-out": "160ms",
+    "--ion-ease-out": "cubic-bezier(0.22, 1, 0.36, 1)",
+    "shutter": "130ms",
+    "flash": "380ms",
+    "--ion-develop": "2.4s (proposed shared token)",
+    "moodBlend": "2s (Study lit, zone change)"
+   },
+   "reducedMotion": "DOM: opacity only. Unity: Feel.ReducedMotion seeded from the OS; prints arrive developed; no flicker, swing or sweep"
+  },
+  "z": {
+   "canvas": 0,
+   "overlayScrim": 20,
+   "labelSheet": 30,
+   "plan": 30,
+   "arcadeBezel": 40,
+   "loader": 50,
+   "liveRegion": "visually hidden, not stacked",
+   "note": "label, plan and arcade share one exclusive slot, so only one is open at a time"
+  },
+  "breakpoints": {
+   "sheet": "below 720px the label becomes a bottom sheet",
+   "loaderCompact": "below 1024px",
+   "manorUnsupported": "touch-only or narrower than 900px: the Front Door shows 'needs a desktop browser'; the Manor is never served to phones"
+  }
+ },
+ "seams": [
+  "1. up/lens (Lead D Gameplay + Lead A Projection/Shaders), cut from upstream/main. Files:\n- InstantCamera.cs: Lens, FovY, SetLens, Aperture, Film, BeforeCapture, LensChanged; CaptureFovY stays 50.\n- ViewfinderFrame.cs: settable FovY.\n- FirstPersonController.cs: ViewFov and its spring, SetLensView/ClearLensView, look scaling.\n- PhotoHolder.cs: skip digit, wheel and Q/E handling in camera mode. NEW: a static place-guard hook, Func<int,bool> PlaceAllowedInZone, where null means allowed; Place is refused while it returns false.\n- PhotoOverlayUI.cs: reads ViewFov.\n- Feel.cs: becomes partial.\n- IonAtmosphere.hlsl: film branch.\n- ProjectionSystem.cs: RenderInto made internal, with an optional projection.\n- EditMode tests.",
+  "2. up/palette (Lead A), cut from upstream/main after orchestrator sign-off. Files:\n- Surface.cs and Palette.cs: Gilt 24, Marble 25, Velvet 26, Flame 27, NEW Silver 28; Pat.Marble 18; finish modes.\n- FlatToon.shader: _Finish 1 (metal ramp) and 2 (sheen); 8 global pools before fog.\n- IonPattern.hlsl: Marble.\n- IonAudio.Footsteps.cs: footstep sounds for Marble and Velvet.\n- ArchKitTests.cs and PatternUVTests.cs: additions only.\n- Optional: UltraFx fades lights instead of popping them.",
+  "3. up/zone-streaming (Lead C), stacked on up/zone-catalog once the orchestrator confirms. Files:\n- Room.cs: Load = Eager / Lazy / Unloadable.\n- ZoneCatalog.cs: Streaming switch defaulting to false; Create(key); SetLoad.\n- GameBootstrap.cs: BuildZone and CaptureZone extracted with no behaviour change; EnsureBuilt inside GoToRoom, GoToZone and OnCheckpointRestored; UnloadIdle; timing logs.\n- IonPlayTestBase.cs: AfterBoot hook and StartInZone.\n- StreamingPlayTests.cs (new).",
+  "4. up/manor-ux (Lead D, with Lead C for room exits). Files:\n- IonPointerLock.jslib and WebGLTemplates/Ion/index.html: a programmatic release does not start the cooldown.\n- ClickToPlayOverlay.cs: controls-sheet provider.\n- PlayerInteractor.cs: LMB-to-use behind a flag that defaults off.\n- HubLightTable.cs and GalleryEnding.cs: a return to the Manor when pf.foyer is registered.\n- NEW: an optional font on PropKit labels (Assets/Scripts/Levels/LevelProps.cs); by default the labels render as they do today.",
+  "5. up/web-diet (Lead A), cut from upstream/main. File: UniversalRenderPipelineGlobalSettings.asset. Null the ten FilmGrain textures and the SMAA Area/Search textures; Bloom is untouched. Measured at integration."
+ ],
+ "crewBriefs": [
+  {
+   "crew": "M-F",
+   "goal": "Split the fork runtime into owned folders and register all seven Manor zones with working stub rooms. Stub every cross-crew contract and ship content v2 as placeholders. Every M crew can then build in parallel with no cross-edits, and the suite stays green.",
+   "inScope": [
+    "Create Runtime/{Registry, Content, Rooms/{Core,Foyer,Gallery,Honours,CameraRoom,Wing,Workshop,Study}, Exhibits, Authored, Camera, Look, Overlay, Streaming, PaintingWorlds/{Look,StarryNight,Portals}}, Assets/Portfolio/Models/ and Tests/EditMode (asmref). Pre-commit every .meta file. The namespace stays Ion.Portfolio.",
+    "Move today's files with no behaviour change: ManorHall to Rooms/Core; ManorFoyer and GrandGallery to their room folders; candle and decor kit to Look/; painting frame and arcade geometry to Exhibits/; Arcade.cs and IonArcade.jslib to Overlay/; PortfolioCatalog to Content/; PortfolioRegistrar to Registry/.",
+    "Registry: register pf.foyer 1000, pf.gallery 1010, pf.honours 1020, pf.lens 1030, pf.wing 1040, pf.workshop 1050 and pf.study 1060. Add these StartKeyFromUrl aliases: honours|hall, lens|lenses|camera-room, wing, workshop|robot|cad, study|about|contact.",
+    "Stub rooms for Hall, Camera Room, Wing, Workshop and Study, each at its M-D004 size, with a spawn, one Walk solution and a padless [ GRAND GALLERY ] door within 3 m of arrival as the final Teleport. Build must work with ctx.Game == null.",
+    "ManorHall.Build(height = 6). Door works on any wall. Add a faceted apse helper. ManorDoor.Build: a Niche opening plus the public Ion.Gameplay.Teleporter component on a fork GameObject, with no PropKit pad. It is used by the stub rooms only; the Foyer and Gallery keep their pods until M-C2 swaps them.",
+    "Compiling no-op stubs:\n- HeroKit.{GlassAward, MedalGantry, CameraMonument, RobotStatue(..., ExplodeSpec explode = null), Plinth, Audit};\n- AuthoredHero.TryBuild(string id, Transform parent, Vector3 base, Dir facing) returning false;\n- ExhibitUsable.Attach(Transform, Vector3 focus, ExhibitRef, float range = 4.5f, Action onRead = null);\n- ManorGlow.Register(Transform, PoolKind);\n- RoomLighting.Light(Transform, RoomContext, string key);\n- CameraRoomKit.Furnish;\n- DoorPrint.Hang(Transform, Vector3 centre, Dir facing, DioramaShot);\n- HallSet.ApseBay(Transform);\n- WorkshopSet.StatueBay(Transform);\n- PaintingWorldRegistry.Register(WorldSpec);\n- Streaming/ZoneLoads.",
+    "Content v2: ProjectEntry gains links, media, tags and placeholder. Add HonourEntry, WorkshopFile (robot HeroSpec, cad[], bench[]) and StudyFile (contact, chapters[], portrait). Ship projects.json, honours.json, workshop.json and study.json with placeholder:true and visible [PLACEHOLDER: ...] text, replacing 'Project One', 'Your role' and '2026'.",
+    "Add one smoke-test file per crew folder."
+   ],
+   "outOfScope": [
+    "Any visual change to the Foyer or Gallery beyond moving files",
+    "Lighting, new Mats, exhibit meshes, door prints",
+    "Any upstream-owned file",
+    "Real owner facts"
+   ],
+   "ownedGlobs": [
+    "Assets/Portfolio/Runtime/Registry/**",
+    "Assets/Portfolio/Runtime/Content/**",
+    "Assets/Portfolio/Resources/Portfolio/*.json",
+    "Assets/Portfolio/Ion.Portfolio.asmref",
+    "Assets/Portfolio/Tests/EditMode/*.asmref",
+    "Assets/Portfolio/Tests/PlayMode/Registry*.cs",
+    "Assets/Portfolio/Tests/PlayMode/Content*.cs",
+    "SEED EXCEPTION (this PR only, before any other M crew starts): first versions of every stub file in the other crews' folders; ownership-check runs with -Owned 'Assets/Portfolio/**'"
+   ],
+   "acceptance": [
+    "powershell -File scripts/ion.ps1 test is fully green. The test count is at least the baseline plus the new tests. ArtPlayTests constants are unchanged.",
+    "RegistryTests: the 7 keys sit at orders 1000-1060, indices 6-12 and x 300-600 (stepping 50). If pw.starry is registered, its index is 13 or more. ZoneCatalogTests passes unchanged (Rooms.Count - ZoneCatalog.Count == 6).",
+    "Every existing ManorTests assertion passes unchanged: 8 frames, foyer to gallery, foyer game door to t1, arcade usable with E, gallery leads home.",
+    "The StartKey tests cover all 13 new aliases, and '?zone=camera' still returns 'camera'.",
+    "Each stub room passes ArtPlayTests (pattern space, 120 / 60k, Arch.Validate with ctx.Game == null) and ProjectionPlayTests (non-empty solutions, ground within 0.15 m). Each sits within ±9 m of its root in X. Its [ GRAND GALLERY ] trigger centre is within 3.0 m of arrival.",
+    "A PlayMode test walks into a padless door and lands in the target zone within 3 s. The stub rooms contain 0 PropKit teleporter pads.",
+    "The placeholder guard passes: every visible string in pf.* zones and in the content JSON is sourced or starts with '[PLACEHOLDER'.",
+    "The ownership-check prints PASS, and no upstream file changes."
+   ],
+   "evidenceRequired": [
+    "Full-suite pass/fail summary lines and the Build/results-<platform>.xml path",
+    "ownership-check PASS output",
+    "git diff --stat at the PR head SHA",
+    "Before/after Foyer and Gallery PlayMode screenshots showing no visual change"
+   ],
+   "after": []
+  },
+  {
+   "crew": "M-QA",
+   "goal": "Give every crew and gate one evidence standard: TourShots, per-zone budget JSON that counts canvases and light candidates, a mud metric, route timings, and guards that catch invented facts, stray textures and too many lights.",
+   "inScope": [
+    "TourShots PlayMode test: for every pf.* zone, and pw.* when present, teleport to the named viewpoints exported by each room (spawn, arrival, first view, each exhibit and walk spot, the door-print pairs). Capture 1920x1080 PNGs at Low, at Ultra, with lights off, and with pools off once up/palette lands.",
+    "Per-shot JSON: sha, zone, tier, viewpoint, audited batches, world Canvas count, tris, registered and enabled LocalLights, active pools, mud, ceiling-band mud, cool shadow, warm share, indicative frame ms.",
+    "Port m-red-hostile's mud_metric.py to scripts/fork/mud_metric.py with documented thresholds.",
+    "Fork guard tests (ratcheted):\n- per zone, audited batches + canvases stay within the 7-row cap;\n- at most 8 registered LocalLight candidates per zone, and at most 8 enabled on Ultra;\n- no Light under any hero root;\n- no runtime Texture2D in pf.* zones except photo previews (the allowlist holds the 3 known ManorKit generators until M-C1 empties it);\n- no plaque string wraps mid-word;\n- the placeholder guard.\nZones over their cap today (the Gallery has 25 lights) may not get worse than the recorded baseline. Baseline entries are deleted as the room crews bring zones under cap.",
+    "Route test at 4.5 m/s with dwell times. Fast path: Foyer, Gallery bay 1, Workshop print, Workshop inlay. Everything path: Study bureau, 8 frames, Workshop, Hall at maximum, Camera Room.",
+    "scripts/fork/tour.ps1 wraps ion.ps1 test-play -Filter TourShots in the background and copies the output to C:\\Users\\Aaron\\Documents\\GitHub\\portfolio-evidence\\wave3\\<crew>\\<sha>\\. docs/portfolio/qa/tourshots.md documents the schema."
+   ],
+   "outOfScope": [
+    "Changing room content, lights or moods",
+    "Editing upstream tests",
+    "WebGL builds"
+   ],
+   "ownedGlobs": [
+    "Assets/Portfolio/Tests/PlayMode/Tour/**",
+    "Assets/Portfolio/Tests/PlayMode/Guards/**",
+    "scripts/fork/tour.ps1",
+    "scripts/fork/mud_metric.py",
+    "docs/portfolio/qa/**"
+   ],
+   "acceptance": [
+    "tour.ps1 runs only through ion.ps1 with run_in_background. It produces PNG + JSON for all 7 pf.* zones in every mode.",
+    "The JSON batch and tri numbers match ArtPlayTests for the same zone within 1%. canvasCount equals the number of world-space Canvas components under the zone root.",
+    "On m-red-hostile's live-02, live-03 and live-04 PNGs, mud_metric.py reproduces mud 0.76 / 0.69 / 0.70 within ±0.02.",
+    "The guards and the route test are green on the current content under the ratchet. The fast path takes 60 s or less and the everything path 180 s or less.",
+    "The full suite is green, the test count rises, and the ownership-check passes."
+   ],
+   "evidenceRequired": [
+    "One complete TourShots set (PNG + JSON) at the head SHA",
+    "mud_metric reproduction output",
+    "Route timing output",
+    "Full-suite summary lines and ownership-check PASS"
+   ],
+   "after": [
+    "M-F"
+   ]
+  },
+  {
+   "crew": "Seams",
+   "goal": "Build the five upstream-owned seams on up/* branches cut from upstream/main, one at a time and behaviour-neutral by default, so no fork crew ever edits an upstream file.",
+   "inScope": [
+    "Order: up/lens (with the PhotoHolder place-guard hook), then up/palette (with Silver 28), then up/zone-streaming, then up/manor-ux (with the optional label font), then up/web-diet. The file lists are in seams[].",
+    "Each seam ships its own tests and timing logs. Each PR names the fork crew it unblocks.",
+    "Ask for orchestrator sign-off on the FlatToon finishes, the pools and Silver before starting up/palette. Confirm the base for up/zone-streaming."
+   ],
+   "outOfScope": [
+    "Any Assets/Portfolio/** file",
+    "Anything sent to Lets-be-strategic-here/project.ion",
+    "Merging (the orchestrator merges)",
+    "WebGL builds"
+   ],
+   "ownedGlobs": [
+    "Assets/Scripts/Gameplay/InstantCamera.cs",
+    "Assets/Scripts/Gameplay/ViewfinderFrame.cs",
+    "Assets/Scripts/Gameplay/FirstPersonController.cs",
+    "Assets/Scripts/Gameplay/PhotoHolder.cs",
+    "Assets/Scripts/Gameplay/PlayerInteractor.cs",
+    "Assets/Scripts/Presentation/PhotoOverlayUI.cs",
+    "Assets/Scripts/Presentation/ClickToPlayOverlay.cs",
+    "Assets/Scripts/Presentation/Motion/Feel.cs",
+    "Assets/Scripts/Presentation/Surface.cs",
+    "Assets/Scripts/Presentation/Palette.cs",
+    "Assets/Scripts/Presentation/Quality/UltraFx.cs",
+    "Assets/Scripts/Presentation/Audio/IonAudio.Footsteps.cs",
+    "Assets/Shaders/FlatToon.shader",
+    "Assets/Shaders/IonAtmosphere.hlsl",
+    "Assets/Shaders/IonPattern.hlsl",
+    "Assets/Scripts/Projection/ProjectionSystem.cs",
+    "Assets/Scripts/Levels/Room.cs",
+    "Assets/Scripts/Levels/ZoneCatalog.cs",
+    "Assets/Scripts/Levels/GameBootstrap.cs",
+    "Assets/Scripts/Levels/LevelProps.cs",
+    "Assets/Scripts/Levels/Rooms/HubLightTable.cs",
+    "Assets/Scripts/Levels/Rooms/GalleryEnding.cs",
+    "Assets/Plugins/WebGL/IonPointerLock.jslib",
+    "Assets/WebGLTemplates/Ion/index.html",
+    "Assets/UniversalRenderPipelineGlobalSettings.asset",
+    "Assets/Editor/ProjectSetup.cs",
+    "Assets/Tests/EditMode/**",
+    "Assets/Tests/PlayMode/IonPlayTestBase.cs",
+    "Assets/Tests/PlayMode/StreamingPlayTests.cs"
+   ],
+   "acceptance": [
+    "Every seam: existing tests stay untouched and green; the test count rises; ArtPlayTests constants are unchanged; ownership-check.ps1 -Seam -Base upstream/main prints PASS. Shader seams compile for WebGL2.",
+    "up/lens:\n- with no lens set, ViewFov = 70;\n- CriticFixTests.cs:46-51 and RoomSolutionTests.cs:126 pass untouched;\n- with film mix 0 the render is within 1/255 of before;\n- with a null PlaceAllowedInZone, placement is unchanged; when it returns false, Place is refused and the photo stays held (new test).",
+    "up/palette:\n- ArchKitTests round-trips all 29 Mats;\n- Pat.Marble decodes;\n- with pool count 0 the render is within 1/255 of before;\n- the pool count is clamped to 8;\n- the SRP Batcher stays compatible.",
+    "up/zone-streaming:\n- with Streaming false, boot builds the same zones in the same order and checkpoint ids are unchanged;\n- the mesh count is back at baseline after 5 load and unload cycles;\n- a photo survives its zone unloading.",
+    "up/manor-ux:\n- the default sheet provider and the default label font reproduce today's output (1/255 or less);\n- LMB-to-use is off by default;\n- the Manor return appears only when pf.foyer is registered."
+   ],
+   "evidenceRequired": [
+    "Per seam: diff --stat, full-suite summary lines, ownership-check -Seam PASS, and the new test names",
+    "Shader compile logs for up/lens and up/palette",
+    "Before/after TourShots pixel-diff numbers for the neutral defaults",
+    "StreamingPlayTests timing lines"
+   ],
+   "after": []
+  },
+  {
+   "crew": "M-C1",
+   "goal": "Statue-scale exhibits that read as monuments from the doorway on every tier. They are built in code first and use authored heroes once M-C8 delivers them, with no invented facts.",
+   "inScope": [
+    "Exhibits/HeroKit, code path:\n- GlassAward: the DECA glass, 4.25 m;\n- MedalGantry: 1-5 medals that swing as devices with at most 2 Mats each;\n- CameraMonument: 2.7 m. No lettering in code; the authored version carries it (D-011). Never Concrete standing in for silver.\n- RobotStatue: 3.5 m, with ExplodeSpec as the anamorphic rule p' = E + k(p - E), Brass trail rods, and a vertical-explode fallback;\n- Plinth and Audit. Add HeroMeshes.Frustum and ClippedHull.",
+    "HeroKit calls AuthoredHero.TryBuild(id) first and falls back to the code hero.",
+    "Exhibits/ExhibitKit:\n- frames at 4.2 x 3.15 m (bay 1) and 3.2 x 2.4 m, with no white mat; a missing cover shows a Frost [ ] slide;\n- plaques with their centre at 1.5 m, lower right, clear of the rail;\n- the DoorPrint frame: Polaroid, 1.6 x 1.2 m, bound to a DioramaShot;\n- the 'Plan of the house' frame;\n- the arcade cabinet rebuilt in walnut and Brass with the [ ] monogram, its title as a label and the screen as its only glow, with the two runtime textures removed.",
+    "Attach ExhibitUsable to every hero, frame, cabinet and CAD bay.",
+    "Phase B (after up/palette): Gilt on frame edges, clips and rails (10% or less of the visible wall); Marble plinths; Silver medals."
+   ],
+   "outOfScope": [
+    "Placing exhibits (M-C2, M-C7)",
+    "Lights, moods, pools and the DECA sweep (M-C4)",
+    "Panel UI (M-C5)",
+    "Blender modelling (M-C8)",
+    "Any Light component on a hero"
+   ],
+   "ownedGlobs": [
+    "Assets/Portfolio/Runtime/Exhibits/**",
+    "Assets/Portfolio/Tests/PlayMode/Exhibits*.cs",
+    "Assets/Portfolio/Tests/EditMode/Exhibits*.cs"
+   ],
+   "acceptance": [
+    "HeroKitTests: every hero builds with ctx.Game == null, passes Arch.Validate, and has no Light component.",
+    "Code heroes (batches / tris, Ultra included):\n- DECA: 4 / 850;\n- gantry with 5 medals: 4 + 2 per swinging medal / 2.5k;\n- camera: 2 / 2.1k;\n- robot: 2 / 1.4k, rods included.\nHeights within 5% of 4.25, 3.4, 2.7 and 3.5 m.",
+    "ExplodeSpec EditMode test:\n- from E = (0, 1.62, -1.5), every part's projected centroid is within 0.5 px of its assembled position at 1920x1080 and 50 degrees;\n- 0.30 m off to the side, the worst part shifts 0.75 degrees or more;\n- k stays within 0.68-1.16, with the tower and base at k = 1.",
+    "AuthoredHero path: with a stub returning true, HeroKit uses the authored hero; with false, the code hero builds. Both paths pass ArtPlayTests.",
+    "Frame sizes are exact. Plaque centres sit at 1.5 m ±0.05 and at least 0.03 m above the rail top. Placeholder plaques start with '[PLACEHOLDER'. The glass shows only the emblem.",
+    "Medal swing: soft spring 2.08 Hz / 0.58, settled within 2.5 s, 0 motion under reduced motion. The Hall stays within 90 / 45k.",
+    "The arcade test passes unchanged, and the M-QA texture allowlist is empty after this crew.",
+    "Lights-off TourShots at 12 m show each hero's silhouette on Low. Gate G3a: the code DECA stands in pf.honours with its plaque, and E opens its label."
+   ],
+   "evidenceRequired": [
+    "TourShots of each hero at 12 m, 3 m and 1 m (Low, Ultra, lights off) at the head SHA",
+    "Per-hero audit JSON",
+    "ExplodeSpec test output",
+    "Full-suite summary lines and ownership-check PASS"
+   ],
+   "after": [
+    "M-F"
+   ]
+  },
+  {
+   "crew": "M-C2",
+   "goal": "The Foyer, Grand Gallery, Hall of Honours, Camera Room and Painting Wing at their final sizes, with the architrave door kit and the two door prints. Every exhibit is placed for the 60-second and 3-minute paths, and the Grand Gallery is always one step away.",
+   "inScope": [
+    "Shells per M-D004:\n- roof parapet 0;\n- Style.Base set to a Mat already in the room;\n- a dark Walnut ceiling field with Brass fillets on the cornice lip and beam soffits;\n- a Niche opening at each frame and across the apse, so the string course stops;\n- stone columns;\n- no Pat.Lattice.",
+    "Rooms/Core: the ManorDoor kit (M-D024) and DoorPrint.Hang. Swap the Foyer and Gallery pods for padless doors.",
+    "Foyer: the triptych, with the Study door at (-5.5, 0, 18.5), the Gallery door at (0, 0, 18.5) and the game door at (5.5, 0, 18.5). Add the name frieze (cap 0.6 m) and the [ ] medallion at z 7. Keep 4 columns. Delete the spawn pedestals and the welcome toast.",
+    "Gallery per M-D005: bays, frames, cross-arch A frieze, 4 doors, the two door prints (built with HallSet.ApseBay and WorkshopSet.StatueBay in its DioramaRoot), the arcade bay and the plan frame. Return landing spots per M-D002.",
+    "Hall per M-D006: Rooms/Honours/HallSet.ApseBay builds the shared set; the rope line goes around the DECA.",
+    "Camera Room shell, 16 x 24 x 6: the monument on the axis, calls CameraRoomKit.Furnish, and a door to the Wing.",
+    "Wing, 12 x 14 x 7: list-built portal anchors (1 world on the far wall axis; worlds 2-3 in the side slots).",
+    "Export walk spots, exhibit positions and door-print pairs as public constants for M-QA, M-C4 and M-C5."
+   ],
+   "outOfScope": [
+    "Moods, fixtures and pools (M-C4)",
+    "Exhibit meshes (M-C1, M-C8)",
+    "Camera devices (M-C3)",
+    "Workshop and Study (M-C7)",
+    "Portals and worlds (G-C3)",
+    "Overlay UI (M-C5)"
+   ],
+   "ownedGlobs": [
+    "Assets/Portfolio/Runtime/Rooms/Core/**",
+    "Assets/Portfolio/Runtime/Rooms/Foyer/**",
+    "Assets/Portfolio/Runtime/Rooms/Gallery/**",
+    "Assets/Portfolio/Runtime/Rooms/Honours/**",
+    "Assets/Portfolio/Runtime/Rooms/CameraRoom/**",
+    "Assets/Portfolio/Runtime/Rooms/Wing/**",
+    "Assets/Portfolio/Tests/PlayMode/ManorTests.cs",
+    "Assets/Portfolio/Tests/PlayMode/Rooms*.cs"
+   ],
+   "acceptance": [
+    "Every pf.* room passes ArtPlayTests and ProjectionPlayTests. Every existing ManorTests assertion passes; constants may move, assertions may not.",
+    "Inner sizes match M-D004 on the 0.25 grid, and closed rooms stay within ±9 m in X.",
+    "Door-graph test across the 7 rooms plus one pw.* world:\n- the maximum depth from the Gallery is 3;\n- every non-Gallery [ GRAND GALLERY ] trigger is within 3.0 m of arrival;\n- the Gallery has exactly 4 doors and the Foyer 3.",
+    "There are 0 PropKit teleporter pads in pf.* zones. Each door adds 0 device batches and 1 canvas or fewer (2 for the Foyer's side doors).",
+    "Door prints:\n- Hall arrival equals its print's shot pose within 0.05 m and 0.5 degrees;\n- each preview has 0.5% or more edge pixels;\n- a reviewed lights-off pair (the print beside the arrival view) shows nothing outside the set.",
+    "Name friezes: Foyer cap height 0.6 m or more, Gallery 0.45 m or more, each at least 4.5:1 measured on the lights-off PNG.",
+    "No string-course pixels inside any frame rectangle in the TourShots. No walkable wall uses Pat.Lattice, and no closed hall has a roof parapet.",
+    "Caps from the TourShots JSON (canvases included):\n- Foyer: 85 / 24k\n- Gallery: 80 / 44k\n- Hall: 90 / 45k, with the code heroes\n- Camera Room: 85 / 40k\n- Wing: 55 / 25k\nRoute tests: fast path 60 s or less, everything path 180 s or less."
+   ],
+   "evidenceRequired": [
+    "TourShots (Low, Ultra, lights off) of every walk spot, plus JSON, at the head SHA",
+    "Door-print pairs (print beside the arrival view)",
+    "Door-graph test output and route timings",
+    "Full-suite summary lines and ownership-check PASS"
+   ],
+   "after": [
+    "M-F"
+   ]
+  },
+  {
+   "crew": "M-C3",
+   "goal": "The owner's camera: an X-T5 in hand with collectable lenses, film looks and an instant print that develops. Everything stays lightweight and goes through the up/lens seam, and photos can never cut the protected rooms.",
+   "inScope": [
+    "Camera/LensKit: 5 primes, ViewFovFor and LookScale. LensCollection: a PlayerPrefs bitmask, re-mounting the 28 mm on Restart.",
+    "LensPickup and FilmPickup are UsableBehaviours with serialized-only state, built from at most 2 Mats (Graphite + Brass).",
+    "FilmLook: Standard, Candle, Vivid, Mono and Cyanotype (D-006), baked into the print at capture.",
+    "CameraViewmodel on layer 8, using M-C8's X-T5 LOD (2.5k tris or less, with the real lettering per D-011). It falls back to Geo primitives without lettering until that LOD lands.",
+    "PrintEject and Ion/PrintDevelop: the print develops over 2.4 s and arrives developed under reduced motion.",
+    "D-008: a registrar sets PhotoHolder.PlaceAllowedInZone to refuse pf.foyer, pf.gallery, pf.honours, pf.workshop and pf.study, with a prompt line.",
+    "CameraRoomKit.Furnish:\n- the camera stand and a refill crate;\n- 4 lens plinths, each with a sample print made with RegisterDioramaShot at that lens's FovY;\n- 3 film plinths;\n- the Frost print table under the safelight anchor.",
+    "Capture DoF last."
+   ],
+   "outOfScope": [
+    "Upstream files (up/lens)",
+    "The Camera Room shell (M-C2)",
+    "Moods and the safelight pool (M-C4)",
+    "Exposure triangle, zoom, manual focus, live DoF, rear LCD",
+    "Lens puzzles in worlds (G)"
+   ],
+   "ownedGlobs": [
+    "Assets/Portfolio/Runtime/Camera/**",
+    "Assets/Portfolio/Shaders/**",
+    "Assets/Portfolio/Resources/Portfolio/Camera/**",
+    "Assets/Portfolio/Tests/EditMode/Camera*.cs",
+    "Assets/Portfolio/Tests/PlayMode/Camera*.cs"
+   ],
+   "acceptance": [
+    "LensKitTests:\n- each FovY (78.1, 50, 29.1, 17.4, 11.0) is within 0.3 degrees;\n- ViewFovFor(50) = 70 ±0.01;\n- the mapping is monotone and clamped to 20-88 degrees;\n- LookScale(70) = 1.",
+    "FilmLookTests: Standard is the identity, and a Standard render is within 1/255 of film off.",
+    "CameraLensTests:\n- with the 85 mm mounted, SnapShot gives FovY 17.4;\n- the wheel changes the lens, not the photo;\n- Restart re-mounts the 28 mm;\n- photo clones cannot grant a lens twice.",
+    "ProtectionTests: Place is refused in all 5 protected zones and allowed in pf.lens and pw.starry.",
+    "The viewmodel never appears in a capture. Its proportions are within 2% of 129.5 : 91 : 63.8 mm.",
+    "Each pickup audits at 2 batches or fewer. The Camera Room stays within 85 / 40k. CriticFixTests and RoomSolutionTests are untouched and green.",
+    "DoF passes the focus-plane test, or ships disabled."
+   ],
+   "evidenceRequired": [
+    "Camera Room TourShots at the head SHA",
+    "12-frame filmstrips of raise, lens swap, shutter and develop (normal and reduced motion)",
+    "One sample print per lens",
+    "Full-suite summary lines and ownership-check PASS"
+   ],
+   "after": [
+    "M-F",
+    "Seams:up/lens"
+   ]
+  },
+  {
+   "crew": "M-C4",
+   "goal": "Dim candles that read as royal on every tier: warm pools in cool shade, a dark ceiling with brass edges, and no muddy orange anywhere.",
+   "inScope": [
+    "Phase A (fork-only, available now):\n- Look/ManorLook moods for all 7 rooms plus StudyLit, per M-D012: a cool key, fill assigned after Make, horizon #1C1A2E;\n- per-room ArchStyle, including the Workshop and Study Mat/Pat pairs from WS-D07;\n- the three-swatch wall test.",
+    "Look/RoomLighting fixtures per M-D013, placed at positions exported by M-C2 and M-C7:\n- chandeliers (one 12-candle per room, others 7);\n- girandoles and plinth candle cups;\n- door sconces without lights;\n- the Workshop's three 6-candle lanterns;\n- the Study hearth and desk-candle lights;\n- at most 8 registered candidates per zone.",
+    "Brass fillets on the cornice lip and beam soffits (0 batches). Ultra-only detail only in Brass/Gilt or Trim.",
+    "Phase B (after up/palette):\n- the ManorGlow pool feeder;\n- the amber safelight pool in the Camera Room;\n- the DECA light sweep on read (1.2 s; none under reduced motion);\n- Flame cones;\n- Gilt per M-D015; Velvet only as a full TextileRed swap;\n- the Foyer candle wave (1.5 s or less)."
+   ],
+   "outOfScope": [
+    "Shader code (up/palette)",
+    "Exhibit and frame materials (M-C1)",
+    "Room geometry (M-C2, M-C7)",
+    "Any light on a hero"
+   ],
+   "ownedGlobs": [
+    "Assets/Portfolio/Runtime/Look/**",
+    "Assets/Portfolio/Tests/PlayMode/Look*.cs",
+    "docs/portfolio/direction/manor-look.md"
+   ],
+   "acceptance": [
+    "Lights-off TourShots at every walk spot in all 7 rooms: mud 0.35 or less, ceiling-band mud 0.25 or less, cool shadow 0.30 or more (mud_metric.py).",
+    "With pools on, the warm share is 10-35% at every walk spot.",
+    "Swatch test: Cyanotype, crimson and ivory under pools, scored and published. The chosen wall has the lowest mud, and halo pixels in the 170-200 degree hue range stay under 1% around pools.",
+    "At most 8 registered LocalLight candidates per zone, with the per-room counts matching M-D013. No LocalLight on sconces or heroes.",
+    "ManorGlow tests: flicker 8% or less; 0 under reduced motion; no single-frame jump above 10%. On Low at 1080p, pools on vs off costs 1.0 ms or less, otherwise Low drops to emissive only.",
+    "No zone exceeds its cap after Flame, Gilt and Silver. Gilt covers 10% or less of the visible wall pixels in the Gallery TourShots. If Velvet ships, no TextileRed material remains in pf.* zones.",
+    "The mood table is published in manor-look.md."
+   ],
+   "evidenceRequired": [
+    "Per room: TourShots at Low, at Ultra, with lights off and with pools off, at the head SHA",
+    "mud_metric JSON and swatch-test scores",
+    "Flicker log and frame-ms JSON",
+    "Full-suite summary lines and ownership-check PASS"
+   ],
+   "after": [
+    "M-F",
+    "M-QA"
+   ]
+  },
+  {
+   "crew": "M-C5",
+   "goal": "A non-gamer can enter the Manor, skip to the Grand Gallery, read any exhibit like a museum wall label and get back, by mouse or keyboard alone, in the shared identity's tokens. The loader goes first.",
+   "inScope": [
+    "Phase 1, day one, gate G0, site/manor-overlay only: the loader restyle by compose-time script:\n- candlelit, with the [ ] monogram and the owner's name;\n- three control rows plus 'Esc steps back out';\n- 'Enter the Manor' and 'Go straight to the Grand Gallery';\n- 'Read everything as a page' as the first focusable item;\n- removed: the graph paper, the '[project]ion' title, the 12-row wall and 'Built with Unity'.",
+    "Phase 2, after M-F merges:\n- Overlay/ExhibitUsable with range 4.5 m, prompt 'read', and CanUse false for empty slots. Use passes the content JSON to IonPanelOpen and calls onRead.\n- The jslib API: IonPanelOpen/Close, IonMapOpen/TakeRequest, IonArcadeOpen/Close, IonOverlayIsOpen/Serial, IonAnnounce, IonPrefersReducedMotion.\n- The window.ionOverlay module: exclusive slot, focus trap and return, Esc, and history.pushState so Back closes it.\n- The wall label, including the Study contact label and the 'See it in the Workshop' link.\n- The 'Plan of the house' on M: an SVG plan plus a real list of all 7 rooms, Grand Gallery first.\n- The arcade bezel, with tokens under :where(:root).",
+    "The loader skip and map travel both go through IonMapTakeRequest, so no seam is needed.",
+    "Seed Feel.ReducedMotion from the OS. Add a polite live region. Fix the arcade's accessibility defects (draft list)."
+   ],
+   "outOfScope": [
+    "Unity pause-card internals (up/manor-ux)",
+    "Room geometry and toasts (M-C2, M-C7)",
+    "publish.ps1 (request the injection hook)",
+    "Content facts"
+   ],
+   "ownedGlobs": [
+    "Assets/Portfolio/Runtime/Overlay/**",
+    "Assets/Portfolio/Plugins/WebGL/**",
+    "site/manor-overlay/**",
+    "Assets/Portfolio/Tests/PlayMode/Overlay*.cs"
+   ],
+   "acceptance": [
+    "G0: the loader script, run on a copy of the template, produces 3 rows and both buttons, with 'Read everything as a page' first in focus order. The name and monogram are visible in the first screen. Visible strings contain no '[project]ion' or 'Built with Unity'.",
+    "Every pf.* exhibit has an ExhibitUsable, and Use passes valid JSON to an Editor bridge stub. Map travel lands within 0.5 m of the chosen spot, in the right zone, for all 7 rooms.",
+    "Harness page site/manor-overlay/test.html, checked in the crew's own playwright-cli session (muted config, closed afterwards):\n- axe reports 0 serious issues;\n- keyboard-only open, Tab cycle and close by Esc, browser Back and the Back button all work, returning focus to the canvas;\n- under reduced motion, transitions are opacity only;\n- contrast: ink on paper 16.5:1, accent on darkroom 8.1:1, and the accent is never text on paper;\n- hit targets are 24 px or larger.",
+    "No overlay leaves pointer lock stuck (a test matrix of button, Esc and Back)."
+   ],
+   "evidenceRequired": [
+    "playwright-cli screenshots at 1440 and 1280 of the loader, panel, plan and arcade, in normal and reduced motion",
+    "axe JSON",
+    "Keyboard-flow filmstrip",
+    "PlayMode summary lines and ownership-check PASS"
+   ],
+   "after": []
+  },
+  {
+   "crew": "M-C6",
+   "goal": "The Manor pays at boot only for what a visitor sees first, and the download shrinks, without ever breaking rewind, checkpoints, carried photos or the door prints.",
+   "inScope": [
+    "The Streaming/ registrar turns ZoneCatalog.Streaming on only when UNITY_WEBGL && !UNITY_EDITOR. Load classes:\n- Eager: Foyer, Gallery, Camera Room;\n- Lazy: Hall, Wing, Workshop, Study;\n- Unloadable: the pw.* prefix.",
+    "Fork StreamingTests with streaming on, through the seam's AfterBoot hook:\n- doors build their Lazy target under the fade;\n- worlds unload when they are not pinned;\n- a world photo can still be placed in the Camera Room after its world unloads.",
+    "Boot and build timing report. A written report on the music on-demand fetch spike. docs/portfolio/direction/manor-perf.md."
+   ],
+   "outOfScope": [
+    "Upstream files",
+    "Streaming the core six",
+    "publish.ps1",
+    "Room content"
+   ],
+   "ownedGlobs": [
+    "Assets/Portfolio/Runtime/Streaming/**",
+    "Assets/Portfolio/Tests/PlayMode/Streaming*.cs",
+    "docs/portfolio/direction/manor-perf.md"
+   ],
+   "acceptance": [
+    "The Editor and default test runs keep streaming off, and the full suite stays green.",
+    "With streaming on:\n- boot builds only Eager zones;\n- the first entry into the Hall and the Workshop builds each room within 300 ms (above 500 ms, file a type:bug against the room's crew);\n- the Gallery's door prints show correctly while their target rooms are unbuilt;\n- Lazy rooms register 0 diorama shots.",
+    "The mesh count returns to baseline after 5 world load and unload cycles. A zone holding the checkpoint or any WorldHistory change is never unloaded. A carried photo survives its world unloading."
+   ],
+   "evidenceRequired": [
+    "StreamingTests summary",
+    "Build and unload ms log lines",
+    "Mesh-count JSON",
+    "manor-perf.md at the head SHA and ownership-check PASS"
+   ],
+   "after": [
+    "M-F",
+    "M-C2",
+    "M-C7",
+    "Seams:up/zone-streaming"
+   ]
+  },
+  {
+   "crew": "M-C7",
+   "goal": "Build the Workshop and the Study as designed by m-ws-designer, with every exhibit a placeholder and both rooms within budget.\n- Workshop: the robot/CAD statue as an anamorphic exploded view you assemble by walking to the mark, plus CAD bays and a bench.\n- Study: contact, about and story around a lit desk candle.",
+   "inScope": [
+    "Workshop shell, 14 x 16 x 7 (x ±7, z -4..12):\n- arrival is a [ ] viewpoint medallion at (0,0,-1.5), yaw 0 (a ManorKit-style medallion, never ctx.Marker or StandingMarker);\n- the statue placed via HeroKit.RobotStatue with ExplodeSpec(E = (0, 1.62, -1.5)), base (0, 0.8, 8.0), on a 0.5 m plinth and a 0.3 m Solid dais (x ±1.75, z 4..10);\n- a Soft rope line 1.5-2.0 m out, with one collider box;\n- a Cyanotype backdrop, plain within 1 m of the silhouette;\n- CAD bays built from workshop.json (2 at launch, up to 3);\n- an oak bench, vice, shadow board with 6 outlines, 5 tools and the calipers;\n- the 'on the bench' slot;\n- the [ GRAND GALLERY ] door at (-2.25, 0, -3.0), which lands in the Gallery at (2.8, 0, 37.5), yaw -90.",
+    "Rooms/Workshop/WorkshopSet.StatueBay(Transform): the shared set (statue, dais, backdrop, floor patch, side walls) that the Gallery builds in its DioramaRoot for the door print.",
+    "Study shell, 10 x 14 x 4.5 (x ±5, z -4..10):\n- a runner and a Walnut bureau at (0,0,5.6) with the letter and the desk candle as a Device;\n- a Limestone hearth with a mantel at 1.25 m and a portrait slot at (0, 2.6, 9.5);\n- Oak bookcases with chapter books from study.json (3 at launch, up to 5);\n- a lectern 'Read everything as a page' at (3.4, 0, -1.0);\n- the [ GRAND GALLERY ] door at (2.25, 0, -3.0), which lands at the Gallery spawn.",
+    "Bureau onRead: light the candle and Atmosphere.BlendTo(ManorLook.StudyLit, 2 s), instant under reduced motion. Restart unlights the room.",
+    "Solutions in order, per WS-D10, with the Teleport last. Export the lantern, hearth and desk-candle positions for M-C4.",
+    "Rooms/*/WorkshopStudyTests.cs:\n- Foyer_StudyDoorLeadsToTheStudy;\n- Gallery_WorkshopDoorLandsOnTheInlay;\n- Study_LetterLightsTheRoomAndRestartUnlights;\n- RunAll in both rooms ends in pf.gallery."
+   ],
+   "outOfScope": [
+    "Statue mesh and ExplodeSpec math (M-C1)",
+    "The authored robot (M-C8)",
+    "Moods and fixtures (M-C4)",
+    "The Foyer and Gallery doors and prints (M-C2)",
+    "Label UI (M-C5)",
+    "Content facts and any visible text on props"
+   ],
+   "ownedGlobs": [
+    "Assets/Portfolio/Runtime/Rooms/Workshop/**",
+    "Assets/Portfolio/Runtime/Rooms/Study/**",
+    "Assets/Portfolio/Tests/PlayMode/WorkshopStudy*.cs"
+   ],
+   "acceptance": [
+    "Both rooms pass ArtPlayTests and ProjectionPlayTests. Every walk spot is on the floor, off the dais.",
+    "Caps (canvases included): Workshop 75 / 30k with 4 light candidates or fewer; Study 60 / 20k with 3 or fewer.",
+    "Gallery_WorkshopDoorLandsOnTheInlay: arrival within 0.05 m of (0,0,-1.5), yaw 0 ±0.5 degrees, and equal to the print's shot pose.",
+    "The return doors sit 2.70 m (Workshop) and 2.46 m (Study) from arrival, both 3.0 m or less.",
+    "The Study letter lights the candle, and the key reaches StudyLit ±0.02 within 2.1 s (instant under reduced motion). Restart restores the unlit state.",
+    "All visible strings are sourced or start with '[PLACEHOLDER'. Slots are built from lists, so an empty list builds 0 slots. Props carry no text.",
+    "Gate G3b: TourShots from the inlay, 'exploded' (-3.4,0,5.2) and 'behind' (3.4,0,10.8), at Low, Ultra and lights off, plus the inlay-vs-print pair, approved by the owner."
+   ],
+   "evidenceRequired": [
+    "TourShots set and the inlay-vs-print pair at the head SHA",
+    "Route timings (WS model: fast path 34 s, everything path 145 s)",
+    "Full-suite summary lines and ownership-check PASS"
+   ],
+   "after": [
+    "M-F"
+   ]
+  },
+  {
+   "crew": "M-C8",
+   "goal": "Deliver the owner's 'absolutely huge things with extreme detail that is performance friendly': the DECA glass, the X-T5 monument and the robot statue, authored in Blender and baked into the FlatToon world as convex parts, plus the X-T5 viewmodel LOD.",
+   "inScope": [
+    "Blender, GPU only (D-012): run scripts/fork/blender_gpu.py first. EEVEE previews at 1600 px or less; Cycles at 64 samples or fewer with denoise; render.threads at 4 or fewer. Acquire the blender lane, renew it every 20 minutes or less, and release it.",
+    "Gather X-T5 references and dimensions (129.5 x 91 x 63.8 mm, dials, controls). Model 1:1 proportions with the real FUJIFILM and X-T5 lettering as geometry (D-011). The [ ] monogram goes only on the strap or the print.",
+    "DECA glass, 4.25 m including the plinth: chamfered facets in Frost and Paper, an inset geometric emblem, no text.",
+    "Robot, 3.5 m: a generic FRC-style silhouette with no team number, season or competition. Part ids match ExplodeSpec.",
+    "Export convex parts named <Mat>.<part> to FBX in Assets/Portfolio/Models/Heroes/. Also export an X-T5 viewmodel LOD of 2.5k tris or less.",
+    "Authored/AuthoredHero.TryBuild: rebuild each part as a ClippedHull with a Surf taken from the name prefix, apply B.Exempt, and bake through Arch.BakeLocal. Two modes: Soft zone geometry, or a Device that photos capture whole.",
+    "Export scripts go in scripts/fork/blender/."
+   ],
+   "outOfScope": [
+    "Placement (M-C2, M-C7)",
+    "Lights and moods",
+    "New Mats (request them through up/palette)",
+    "Textures of any kind",
+    ".blend files in git, Git LFS",
+    "Stock or CC models in place of the owner's heroes"
+   ],
+   "ownedGlobs": [
+    "Assets/Portfolio/Runtime/Authored/**",
+    "Assets/Portfolio/Models/**",
+    "scripts/fork/blender/**",
+    "Assets/Portfolio/Tests/PlayMode/Authored*.cs"
+   ],
+   "acceptance": [
+    "Each hero is 8,000 tris or less in total and 4 audited batches or less. The viewmodel LOD is 2,500 tris or less.",
+    "Every part is convex: hull volume over mesh volume is 0.98 or more. Arch.Validate and ArtPlayTests pattern space pass for both modes.",
+    "Proportions: X-T5 bounding-box ratios within 2% of 129.5 : 91 : 63.8; DECA 4.25 m ±5%; robot 3.5 m ±5%. Lettering is present as geometry, matching the references.",
+    "Each FBX is 2 MB or less. No Texture2D, .blend or LFS is introduced.",
+    "Lights-off TourShots at 12 m show each silhouette on Low. Every Blender render log shows HIP GPU. The lane is released."
+   ],
+   "evidenceRequired": [
+    "EEVEE previews (front, side, three-quarter; 1600 px or less) per hero and a reference sheet with sources, in portfolio-evidence (not committed)",
+    "Per-hero audit JSON and convexity test output",
+    "TourShots at the head SHA",
+    "Full-suite summary lines and ownership-check PASS"
+   ],
+   "after": [
+    "M-F"
+   ]
+  }
+ ],
+ "redTeamResolutions": [
+  "m-red-detail, seven-zone caps (blocker): ACCEPTED. Seven-row table in M-D022. The robot moves to the Workshop. Gallery tris 44k. Workshop 75 / 30k as proposed. Study 60 / 20k, between the 70 / 25k proposed and WS's 55 / 20k.",
+  "m-red-detail, canvases invisible to the audit (blocker): ACCEPTED. Verified at ArchBake.cs:130-132. The M-QA guard counts audited batches plus world Canvases. One plaque per exhibit and one per door. The spawn pedestal plaques are deleted.",
+  "m-red-detail, candle fixtures and light candidates: ACCEPTED as M-D013. Girandoles and cups as pools. At most 8 registered candidates. One 12-candle chandelier per room. Padless doors remove the pad lights too.",
+  "m-red-detail, Ultra-only detail is not budget relief: ACCEPTED. Verified: GameBootstrap.cs:386-389 uses forceRenderingOff while the audit reads enabled. Ultra-only detail only in Brass/Gilt or Trim. No twinned chandelier rings.",
+  "m-red-detail, ceiling and crown moulding: ACCEPTED, combined with m-red-hostile F2. A dark Walnut ceiling field with Brass fillets on the cornice lip and beam soffits. No dentils.",
+  "m-red-detail, string course through the paintings: ACCEPTED. Niche openings per frame and across the apse (Arch.Wall takes params Opening[], Arch.cs:236-238). M-C2 acceptance checks for no course pixels inside frames.",
+  "m-red-detail, plaques on the brass rail: ACCEPTED. Centre at 1.5 m, lower right, at least 0.03 m above the rail top.",
+  "m-red-detail, Mat swaps are additions: ACCEPTED. Velvet ships only as a full TextileRed replacement. Gilt only on relief edges, 10% or less.",
+  "m-red-detail, devices bake one renderer per Mat: ACCEPTED. Pickups use 2 Mats or fewer, with Soft plinth bodies. The 4-pad Gallery limit is met, and pads disappear entirely (M-D024).",
+  "m-red-detail, floor medallions: ACCEPTED, MODIFIED. Medallions only at viewpoints: the Foyer spawn, the Hall arrival and the Workshop arrival. The Hall inlay and arrival are now the same point.",
+  "m-red-detail, rope stanchions: ACCEPTED. Two rope lines only (DECA, robot), Soft with one collider box, 1.5-2.0 m out. None in the Gallery.",
+  "m-red-detail, picture lights / drapes / fireplace: ACCEPTED. No electric picture lights. Drapes only on [ GRAND GALLERY ] doors, not in the Wing. A fireplace only in the Study.",
+  "m-red-detail, hidden geometry, Solid plinths, Foyer columns: ACCEPTED. Parapet 0 (the parameter exists, Arch.cs:680). Style.Base set to an in-room Mat. Soft plinths with a collider. 4 stone columns.",
+  "m-red-detail, the 2.5k cap on the camera monument: REJECTED in favour of owner voice and D-011. The authored monument may use up to 8k tris and must carry the real lettering.",
+  "m-red-hostile F1, five-room plan (blocker): ACCEPTED, using WS's appended orders (1050/1060) rather than 1015/1035, so no index shifts. M-D001, the answered owner question and the Workshop/Study cut lines are removed.",
+  "m-red-hostile F2, muddy orange and a blind gate (blocker): ACCEPTED. A cool key in every room. The Camera Room is cool and dark, with an amber (not red) safelight to bridge D-001. Gates: mud 0.35 or less, ceiling-band mud 0.25 or less, cool shadow 0.30 or more.",
+  "m-red-hostile F3, Gallery scale (blocker): ACCEPTED, MODIFIED. 10 x 48 x 7.5 m (kept at 48 m long for 4 doors and the arcade bay). Works at 4.2 x 3.15 m and 3.2 x 2.4 m. The cover ruling is escalated to Lead A with a recommendation of yes.",
+  "m-red-hostile F4, toy heroes and deferred Blender (blocker): ACCEPTED. A new crew, M-C8, builds convex-part authored heroes at up to 8k tris each. The code HeroKit stays as the fallback and as the G3a slice. Silver 28 is requested.",
+  "m-red-hostile F5, sci-fi pods: ACCEPTED, MODIFIED. Architrave doors everywhere, with no pads. The photographs hang beside the two hero doors, not inside every opening, because Lazy targets cannot be rendered at boot.",
+  "m-red-hostile F6, photo magic off the main path: ACCEPTED, MODIFIED. The door prints put it on the 60-second path. The Camera Room comes off the delete list. No camera stand in the Gallery: D-008 protects it.",
+  "m-red-hostile F7, identity at both thresholds: ACCEPTED. The loader restyle is gate G0. The name frieze appears in the Foyer and the Gallery. The Foyer medallion stays, and a test checks that no plaque wraps mid-word.",
+  "m-red-hostile F8, hotel wallpaper and teal halos: ACCEPTED. Ivory Plaster in the Gallery and the Foyer, confirmed by the three-swatch test. Stone columns.",
+  "m-red-hostile F9, rooms sized for imagined content: ACCEPTED, MODIFIED. Hall 16 x 18 x 9 (arrival on the inlay) and Wing 12 x 14 x 7.",
+  "m-red-hostile F10, tactile verbs deleted: ACCEPTED, MODIFIED. One response per exhibit class. Medal swing is cut position 4.",
+  "m-red-hostile F11, arcade mall prop: ACCEPTED. Walnut and Brass with the [ ] monogram. The two runtime textures are removed.",
+  "m-red-hostile F12, download weight: DEFERRED. The core six own diorama shots, which phase-1 streaming forbids. To be revisited once CaptureZone is proven on a Lazy room.",
+  "m-ws-designer, all WS decisions: ADOPTED as M-D026 and M-D027 with three changes. (1) The viewpoint inlay is a medallion, not StandingMarker, so no art-bible exception is needed. (2) Moods follow the cool-key rule, not the warm suns. (3) The new door tests live in M-C7's own test file, not in ManorTests.cs."
+ ],
+ "ownerQuestions": [
+  "Which two projects are your strongest? They hang first, at 4.2 x 3.15 m, in bay 1 of the Grand Gallery. They stay placeholders until you say.",
+  "Which project does the Workshop robot statue stand for? Do you have CAD models to show (0 to 3)?",
+  "How many awards and medals do you have, and what does your DECA glass look like (shape, event, placement, year)? Until you say, we ship 1 hero, 2 award plinths and 3 medals, all marked placeholder.",
+  "In the Workshop, the robot looks assembled only from a brass [ ] mark, and exploded from everywhere else. Do you like that, or would you prefer a normal vertical exploded view?",
+  "For the Study:\n- which contact links go on the letter?\n- which chapters of your story go on the shelves (up to 5)?\n- a portrait above the hearth, or the [ ] monogram?\nAnd for the Workshop: is there something 'on the bench' right now, or should we cut that slot?",
+  "The Foyer's far wall has three doors: Study on the left, Grand Gallery in the centre, the game on the right. Is that the order you want?",
+  "The X-T5 camera model: silver and black, or all black?",
+  "Should clicking (LMB) an exhibit also open its label, besides E? It needs a small change to an upstream file, kept in your fork only.",
+  "May the Manor's first focusable link be 'Read everything as a page', pointing to the Front Door?",
+  "Gallery walls: ivory plaster above walnut panelling, with a crimson carpet. A colour test decides between ivory, deep blue and crimson. Do you have a preference?"
+ ],
+ "cutList": [
+  "Robot/CAD statue in the Gallery (it moves to the Workshop, D-003)",
+  "Contact bureau in the Foyer (it moves to the Study)",
+  "Arcade Parlour as its own zone (it stays a bay at the Gallery's far end)",
+  "Teleporter pods and pad lights on every Manor door (replaced by architraves)",
+  "Pat.Lattice on walkable walls and column shafts in Style.Wall",
+  "Warm orange interior sun keys; brown fog in the Camera Room; the hue-only warm-pixel gate",
+  "Uniform sconce and candelabra rows; a floor candelabra per exhibit; sconce lights; more than one 12-candle chandelier per room; Ultra-twinned chandelier rings",
+  "Electric picture lights, dentils, window and Wing drapes, Gallery rope lines, a Foyer fireplace",
+  "Medallions anywhere except the Foyer spawn, Hall arrival and Workshop arrival",
+  "Spawn pedestal plaques and the 'monogram stele slot'",
+  "Hidden roof parapets on closed halls",
+  "4 of the 8 Foyer columns",
+  "White mats on frames; frame-side benches; blurb hints; Foyer, painting and arcade toasts",
+  "The 12-row controls wall, the graph-paper '[project]ion' loader card and 'Built with Unity' on the Manor loader",
+  "Runtime-generated placeholder textures (ManorKit.cs:217, 246, 303) and the pixel 'ARCADE' marquee",
+  "Gallery [ PLAY THE GAME ] door (D-009)",
+  "34 m Wing and 40 m Hall lengths; Wing slots 4-5 (extend the room when a fourth world exists)",
+  "Turntables, statue quarter-turns, coin drops, any continuous hero animation",
+  "Workshop: stools, pit cart, parts bins, team banners or bumper numbers, FRC field elements, sparks, VFX, tool sounds, a second hero, a sawtooth roof",
+  "Study: armchairs, globe, clock, rug, window, plants, a guestbook of visitor photos, in-world letter text, any Viewfinder trick",
+  "Diorama shots inside Lazy rooms (the Hall, Workshop, Study and Wing stay zero-shot)",
+  "A camera stand in the Gallery",
+  "Medal vitrines, Glass and Crystal Mats, Pat.Glint, translucent panes, billboard flames, decal or vertex-colour pools",
+  "Exposure triangle, continuous zoom, manual focus, live DoF, rear LCD, live grain, 14 mm lens",
+  "In-world 3D map; streaming the core six; prebuild on approach; brotli",
+  "Empty frames, plinths, bays or cabinets: everything is built from lists",
+  "Delete first under pressure, in order: (1) capture DoF; (2) the Bedroom world (G); (3) the Workshop bench block, then CAD bay 3; (4) medal swing; (5) halve the Hall plinths; (6) Velvet; (7) the anamorphic offset (fall back to a vertical explode); (8) the door prints (plain doors); (9) pools on Low"
+ ],
+ "docMarkdown": "# Manor plan: final (M-Manager, Wave 1b)\n\nSupersedes `manor-plan-draft.md`. Built on D-001 to D-012 (D-006 to D-009 at their defaults), the m-ws-designer Workshop/Study design and both red teams. Numbers marked (est.) stay estimates until M-QA's TourShots measure them.\n\n## In one line\nA candlelit royal home of seven rooms, where you enter each hero room through its own photograph.\n\n## Rooms\n| Room | Key · order · index · x | Inner size (m) | Arrival | Holds | Its one moment |\n|---|---|---|---|---|---|\n| Foyer | pf.foyer · 1000 · 6 · 300 | 18×24×6 | (0,0,-2) | name frieze, [ ] medallion, three doors | the far wall is a triptych: Study, Grand Gallery, Play the game |\n| Grand Gallery | pf.gallery · 1010 · 7 · 350 | 10×48×7.5; three bays and an arcade bay | (0,0,-2) | 8 projects, 2 door prints, arcade | your two strongest works, at statue scale, in bay 1 |\n| Hall of Honours | pf.honours · 1020 · 8 · 400 | 16×18×9, apse | medallion (0,0,-1.5) | DECA glass hero, up to 6 award plinths, medal gantry | you arrive 10 m from the hero, exactly where its print was taken |\n| Camera Room | pf.lens · 1030 · 9 · 450 | 16×24×6 | (0,0,-2) | X-T5 monument, camera stand, 4 lenses, 3 films | raise the camera and the room turns into the film stock |\n| Painting Wing | pf.wing · 1040 · 10 · 500 | 12×14×7 | (0,0,-2) | 1 portal at launch, 3 slots | step on the inlay and the frame takes you in (G) |\n| Workshop | pf.workshop · 1050 · 11 · 550 | 14×16×7 | medallion (0,0,-1.5) | robot/CAD statue, up to 3 CAD bays, a bench | the exploded robot snaps together as you reach the mark |\n| Study | pf.study · 1060 · 12 · 600 | 10×14×4.5 | (0,0,-2) | contact bureau, portrait slot, up to 5 chapters | read the letter and the desk candle lights the room |\n\n- **Painting Worlds** are G zones `pw.*` from order 1100, so they take index 13 and up (x 650 and up).\n- **No index shift:** the Workshop and Study come after the Wing in order, so the five draft rooms keep indices 6 to 10.\n- **Aliases:** honours|hall, lens|lenses|camera-room, wing, workshop|robot|cad and study|about|contact. `?zone=camera` still opens the puzzle wing.\n- **The curve:** welcome (Foyer), intimacy (Study, optional), anticipation (Gallery), focus (Workshop), reverence (Hall), curiosity (Camera Room), wonder (Wing), play (arcade bay).\n\n## Circulation\n- **Foyer:** Grand Gallery in the centre (wide), Study on the left, the game on the right (D-009).\n- **Gallery:** [ FOYER ] on the south wall beside spawn. [ HALL OF HONOURS ] on the west wall and [ WORKSHOP ] on the east wall, both in bay 3. [ CAMERA ROOM ] on the far wall, east of the arcade.\n- **The chain:** Camera Room → Wing → worlds.\n- **The way back:** every other room has one [ GRAND GALLERY ] door within 3 m of where you arrive.\n- **Depth:** the Study and the Wing are 2 doors from the Gallery, and a world is 3. The loader, the pause sheet and the M plan each reach the Gallery in one step.\n\n## The signature: you enter rooms through their photograph\n- **The prints:** an instant print (1.6×1.2 m) hangs beside each of the Gallery's Hall and Workshop doors.\n- **How they are made:** the Gallery builds each hero's set (hero, backdrop and a patch of floor) in its own DioramaRoot. It captures the set from the target room's arrival pose.\n- **The payoff:** step through and you land on the brass [ ] medallion where the photo was taken. In the Workshop, that spot is also the anamorphic viewpoint: the exploded robot looks assembled only from there.\n- **The rules it keeps:** this puts photo magic on the 60-second path without pasting anything. D-008 still protects the Gallery, Hall, Workshop and Study. The Hall and Workshop stay Lazy, because the Gallery owns their shots.\n\n## Doors\n- **Architraves, not pods:**\n  - a 2.4×4.2 m Niche opening, lined dark;\n  - a walnut casing with a brass fillet, and lettering on the lintel;\n  - a fork `Teleporter` component at the threshold, which keeps the fade.\n- **Cost:** no pad mesh and no pad light. That saves about 6 batches and 1 light candidate per door (est.).\n- **Drapes:** every [ GRAND GALLERY ] door outside the Wing carries red drapes, so red always means the way back.\n\n## Look\n- **Light:**\n  - The key light indoors is cool and dim (start at #8E9CC8, 0.25 or less).\n  - Warm light comes only from flames, shader pools and Ultra lights.\n  - The fill is cool and is set after `ZoneMood.Make`.\n- **Ceiling:** the darkest surface in each room. A walnut field with no coffer pattern, plus brass fillets on the cornice lip and the beam soffits (about 200 tris, 0 batches).\n- **Walls:**\n  - Gallery and Foyer: ivory Plaster above the walnut dado, unless the three-swatch test (Cyanotype, crimson, ivory) scores better for another.\n  - Pat.Lattice is gone. Columns are stone.\n- **Camera Room:** a cool, dark room with one amber safelight pool (#E39B2B, the Front Door's accent) over the print table.\n- **Wing:** no candles.\n- **Candles:**\n  - one 12-candle chandelier per room, in the first view; any others have 7 candles;\n  - a two-candle girandole above each frame and candle cups on each plinth;\n  - sconces only at doors;\n  - at most 8 registered LocalLight candidates per zone;\n  - no electric picture lights.\n- **Gates (M-QA):**\n  - lights off: mud 0.35 or less, ceiling-band mud 0.25 or less, cool shadow 0.30 or more;\n  - pools on: warm share 10 to 35%.\n\n## Exhibits\n- **Frames:**\n  - Bay 1 holds 4.2×3.15 m works; the rest are 3.2×2.4 m. The hang height alternates by bay.\n  - Until the owner supplies a work, its frame shows a Frost [ ] slide.\n  - Plaques sit at 1.5 m (centre), lower right, clear of the brass rail.\n  - Niche openings stop the 3 m string course at every frame and at the Hall apse.\n- **Heroes:**\n  - **DECA glass** (4.25 m).\n  - **Camera monument:** X-T5 proportions 1:1, with the real FUJIFILM and X-T5 lettering (D-011).\n  - **Robot** (3.5 m): generic, with no team number.\n  - All three are modelled in Blender as convex parts and baked through `Arch.BakeLocal`: at most 8k tris and 4 batches each. The code-built HeroKit ships first and stays as the fallback.\n- **Verbs:** E reads, from up to 4.5 m, and opens a DOM wall label. Each exhibit class also has one physical response, and each is still under reduced motion:\n  - medals swing on the soft spring;\n  - the DECA catches a sweep of light;\n  - the camera can be picked up;\n  - the arcade plays;\n  - the Study candle lights.\n- **Ropes:** only at the DECA and the robot, 1.5 to 2.0 m from the plinth.\n- **Identity:**\n  - The owner's name is lettered on the Foyer far-wall frieze (cap height 0.6 m) and on the Gallery's first cross-arch (0.45 m), at 4.5:1 or better with the lights off.\n  - The Foyer [ ] medallion replaces the two spawn pedestals.\n  - No plaque breaks mid-word.\n\n## Budgets\nDesign caps. Batches here = audited renderers + world-space canvases.\n\n| Zone | Batches / tris | Lights | Basis |\n|---|---|---|---|\n| Foyer | 85 / 24k | ≤8 | measured 73 / 18,664 |\n| Gallery | 80 / 44k | ≤8 | measured 63 / 40,292; robot leaves |\n| Hall | 90 / 45k | ≤8 | est. |\n| Camera Room | 85 / 40k | ≤8 | est.; pickups use 2 Mats or fewer |\n| Wing | 55 / 25k | ≤8 | est. |\n| Workshop | 75 / 30k | ≤8 | est. about 50 / 15k |\n| Study | 60 / 20k | ≤8 | est. about 38 / 10.5k |\n\n- **Ultra twins:** they count on every tier, because the audit reads `enabled` while culling sets `forceRenderingOff`. Ultra-only detail is therefore Brass/Gilt or Trim only.\n- **New Mats:** each new Mat in a zone costs one more batch.\n\n## Seams (one Seams crew, in this order)\n1. up/lens, plus a `PhotoHolder` place-guard hook for D-008.\n2. up/palette: Gilt 24, Marble 25, Velvet 26 (only as a full TextileRed swap), Flame 27, Silver 28; pools and finishes.\n3. up/zone-streaming.\n4. up/manor-ux, plus an optional label font so plaques can use the bridging typeface.\n5. up/web-diet.\n\n## Crews (all on Opus 5.5 at xhigh, per the owner)\n1. **M-F** first: the folder split, seven registered zones, contract stubs and content v2.\n2. Then, in parallel:\n   - **M-QA**;\n   - **M-C1** Exhibits;\n   - **M-C2** Rooms;\n   - **M-C5** Overlay (owns gate G0, the loader);\n   - **M-C7** Workshop & Study;\n   - **M-C8** Authored heroes (holds the Blender lane).\n3. As their seams land:\n   - **M-C4** Look: moods now, pools after up/palette;\n   - **M-C3** Camera: after up/lens;\n   - **M-C6** Streaming: after up/zone-streaming.\n\n**Gates** (the owner approves each):\n- **G0:** the loader restyle.\n- **G3a, the Hall slice:** the code-built DECA, its plaque and label, and its door print.\n- **G3b, the Workshop slice:** the anamorphic robot and its print.\n\n## Delete first under pressure\n1. Capture DoF.\n2. The Bedroom world (G).\n3. The Workshop bench block, then CAD bay 3.\n4. Medal swing.\n5. Halve the Hall plinths.\n6. Velvet.\n7. The anamorphic offset (fall back to a vertical explode).\n8. The door prints (plain doors).\n9. Pools on Low.\n\nThe Camera Room is off the list: it is where the visitor gets the camera.\n\n## What changed since the draft\n- Seven rooms (D-003). The robot moves from the Gallery to the Workshop, and contact moves from the Foyer to the Study.\n- The Gallery is narrower and taller, and its works are bigger. The Hall and the Wing shrink to fit their launch content.\n- Pods become architraves, and the door prints put Viewfinder-style photo magic on the main path.\n- The orange interior sun goes. The mood gate now measures mud instead of hue.\n- The Blender heroes return (the owner's words), with the code-built heroes as the fallback.\n- Caps cover all seven rooms and count world canvases and registered lights.\n\n## Owner questions\nTen questions are open (see ownerQuestions): your two strongest works; the robot's project and any CAD models; your awards and the DECA glass; the anamorphic robot; contact, chapters and portrait; the bench slot; the Study door's side; the camera finish; LMB; the first link.\n"
+}
