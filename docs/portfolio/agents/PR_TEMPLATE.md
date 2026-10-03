@@ -18,7 +18,7 @@ Closes #<n>
 
 ## Ownership check output
 ```
-<paste the full output of: powershell -File scripts/fork/ownership-check.ps1 -Base overhaul -Owned '<glob>','<glob>'>
+<paste the full output of: powershell -File scripts/fork/ownership-check.ps1 -Base origin/main -Owned '<glob>','<glob>'>
 ```
 
 ## Known issues
