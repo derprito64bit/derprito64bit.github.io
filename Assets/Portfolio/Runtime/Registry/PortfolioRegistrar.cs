@@ -62,9 +62,10 @@ namespace Ion.Portfolio
         }
 
         /// <summary>
-        /// The start zone for a page URL: <c>?zone=gallery</c> the Grand Gallery, <c>?zone=game</c> the game (T1), a
-        /// room alias (honours, hall, lens, workshop, study ...) that room, any other <c>?zone=&lt;key&gt;</c> that zone
-        /// (so <c>?zone=camera</c> stays the core camera wing), and the foyer otherwise.
+        /// The start zone for a page URL: <c>?zone=gallery</c> the Grand Gallery, <c>?zone=game</c> the game (T1), one of
+        /// M-D003's room aliases (honours|hall, lens|lenses|camera-room, wing, workshop|robot|cad, study|about|contact)
+        /// that room, any other <c>?zone=&lt;key&gt;</c> that zone (so <c>?zone=camera</c> stays the core camera wing),
+        /// and the foyer otherwise.
         /// </summary>
         public static string StartKeyFromUrl(string url)
         {
@@ -78,7 +79,6 @@ namespace Ion.Portfolio
                 case "foyer":
                 case "manor": return FoyerKey;
                 case "honours":
-                case "honors":
                 case "hall": return HonoursKey;
                 case "lens":
                 case "lenses":

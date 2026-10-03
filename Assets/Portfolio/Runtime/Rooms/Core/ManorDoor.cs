@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Ion.Gameplay;
 using Ion.Levels;
 using Ion.Levels.Arch;
@@ -28,6 +29,26 @@ namespace Ion.Portfolio
 
         public static readonly Vector3 TriggerSize = new Vector3(1.6f, 2.4f, 1.6f);
 
+        /// <summary>The lintel of every way back to the Grand Gallery (M-D002).</summary>
+        public const string GalleryLabel = "[ GRAND GALLERY ]";
+
+        /// <summary>The name of the GameObject that carries a door's teleporter.</summary>
+        public static string NameFor(string label) => "ManorDoor " + label;
+
+        /// <summary>
+        /// Every padless door under <paramref name="root"/> lettered <paramref name="label"/>. Tests and the door graph
+        /// find a door by its label, never as "the only teleporter" or "the last solution".
+        /// </summary>
+        public static List<Teleporter> Find(Transform root, string label)
+        {
+            var doors = new List<Teleporter>();
+            if (root == null) return doors;
+            string name = NameFor(label);
+            foreach (Teleporter t in root.GetComponentsInChildren<Teleporter>(true))
+                if (t.gameObject.name == name) doors.Add(t);
+            return doors;
+        }
+
         /// <summary>The door's Niche opening, for <see cref="ManorHall.Build"/>.</summary>
         public static WallOpening Opening(Dir facing, float along, float height = OpeningHeight) =>
             new WallOpening(facing, along, Ion.Levels.Arch.Opening.Niche(0f, Width, height, 0f, Depth).NoBracket());
@@ -45,7 +66,7 @@ namespace Ion.Portfolio
             PropKit.Plaque(p, face + new Vector3(0f, height + 0.375f, 0f), facing, label);
 
             Vector3 threshold = face + inward * TriggerInset;
-            var go = new GameObject("ManorDoor " + label);
+            var go = new GameObject(NameFor(label));
             go.transform.SetParent(p, false);
             go.transform.localPosition = threshold;
             go.transform.localRotation = Quaternion.Euler(0f, B.Yaw(facing), 0f);

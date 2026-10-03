@@ -25,7 +25,7 @@ namespace Ion.Portfolio
             ManorHall.Build(root, HalfX, Z0, Z1, Height, GalleryDoor);
             ctx.SetSpawn(Arrival, 0f);
             Vector3 door = ManorDoor.Build(root, ctx, ManorHall.Face(HalfX, Z0, Z1, GalleryDoor), GalleryDoor.Facing,
-                                           "[ GRAND GALLERY ]", ManorHall.GoTo(ctx, PortfolioRegistrar.GalleryKey));
+                                           ManorDoor.GalleryLabel, ManorHall.GoTo(ctx, PortfolioRegistrar.GalleryKey));
             AddSolution("walk", RoomSolution.Kind.Walk, new Vector3(0f, 0f, 6f));
             AddSolution("gallery", RoomSolution.Kind.Teleport, door).Destination = PortfolioRegistrar.GalleryKey;
         }
