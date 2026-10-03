@@ -10,7 +10,8 @@ Two uses:
 What it does: picks the best GPU backend available (HIP for AMD, then OPTIX/CUDA, then ONEAPI/METAL), enables only
 GPU devices (the CPU device is disabled so Cycles never falls back to it silently), sets every scene to render on
 the GPU, caps Cycles samples and enables GPU-friendly denoising, limits CPU threads used by Blender itself, and
-prefers EEVEE (GPU rasterizer) for quick previews.
+prefers EEVEE (GPU rasterizer) for quick previews. A render_pre handler sets Cycles back to the GPU at every render
+start. In a background job (-b) with no GPU backend it raises SystemExit instead of falling back to the CPU.
 """
 import sys
 import bpy
@@ -71,8 +72,20 @@ def setup_scenes(backend):
     print('[gpu] scenes:', [(s.name, s.render.engine, getattr(getattr(s, 'cycles', None), 'device', '-')) for s in bpy.data.scenes])
 
 
+def _force_gpu(scene, *_):
+    # Re-asserted at every render start, so a script that switches to Cycles after this file ran still uses the GPU.
+    if scene.render.engine == 'CYCLES' and hasattr(scene, 'cycles'):
+        scene.cycles.device = 'GPU'
+
+
 backend = setup_devices()
+if backend is None and bpy.app.background:
+    # Owner rule: GPU only. A background job with no GPU backend stops here instead of rendering on the CPU.
+    raise SystemExit('[gpu] ERROR: no GPU backend (HIP/OptiX/CUDA) found; refusing to run on the CPU')
 setup_scenes(backend)
+if backend:
+    bpy.app.handlers.render_pre[:] = [h for h in bpy.app.handlers.render_pre if getattr(h, '__name__', '') != '_force_gpu']
+    bpy.app.handlers.render_pre.append(_force_gpu)
 if '--save' in sys.argv:
     bpy.context.preferences.use_preferences_save = True
     bpy.ops.wm.save_userpref()
