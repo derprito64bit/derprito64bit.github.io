@@ -14,6 +14,8 @@ namespace Ion.Gameplay
     /// recovers by itself); below <see cref="KillY"/> the recovery happens at once.
     /// View feel (art bible §9.1): head bob 0.015 m / 2.3 m stride, a landing-dip spring and FOV springs
     /// (place kick, teleport swell). Reduced motion turns all of them off.
+    /// Lens seam: <see cref="SetLensView"/> springs the view to a lens's FOV (and scales mouse look to match) until
+    /// <see cref="ClearLensView"/>; without one, <see cref="ViewFov"/> is exactly <see cref="BaseFieldOfView"/>.
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(CharacterController))]
@@ -123,6 +125,11 @@ namespace Ion.Gameplay
         bool _wasGrounded = true;
         float _fallSpeed;
 
+        // Lens view (SetLensView): the view FOV a lens asks for, on its own spring. _lensFov is NaN when there is no
+        // lens view (the view is exactly the base FOV); _lensTarget is NaN while it springs back to the base.
+        float _lensFov = float.NaN, _lensTarget = float.NaN, _lensVelocity;
+        float _lensFreq = Feel.RaiseFreq, _lensZeta = Feel.RaiseZeta;
+
         // Automation (debug harness / tests): movement input injected instead of the keyboard.
         Vector2 _scriptedInput;
         float _scriptedUntil = -1f;
@@ -134,6 +141,33 @@ namespace Ion.Gameplay
 
         /// <summary>Field of view without the transient FOV springs.</summary>
         public float BaseFieldOfView => _baseFov;
+
+        /// <summary>Range of a lens view FOV (degrees, vertical).</summary>
+        public const float MinViewFov = 1f, MaxViewFov = 170f;
+
+        /// <summary>
+        /// The view's field of view without the transient FOV springs: <see cref="BaseFieldOfView"/>, or the lens view
+        /// (<see cref="SetLensView"/>) while one is set or springing back. The viewfinder frame and the raised photo are
+        /// laid out against it.
+        /// </summary>
+        public float ViewFov => float.IsNaN(_lensFov) ? _baseFov : _lensFov;
+
+        /// <summary>True while a lens view is set or still springing back to <see cref="BaseFieldOfView"/>.</summary>
+        public bool HasLensView => !float.IsNaN(_lensFov);
+
+        /// <summary>
+        /// Mouse-look scale of the current view: tan(ViewFov / 2) / tan(BaseFieldOfView / 2), so a narrow (tele) view
+        /// turns proportionally slower and aiming stays steady. Exactly 1 without a lens view.
+        /// </summary>
+        public float LookScale
+        {
+            get
+            {
+                if (float.IsNaN(_lensFov)) return 1f;
+                float b = Mathf.Tan(Mathf.Clamp(_baseFov, MinViewFov, MaxViewFov) * 0.5f * Mathf.Deg2Rad);
+                return Mathf.Tan(_lensFov * 0.5f * Mathf.Deg2Rad) / b;
+            }
+        }
 
         /// <summary>Current camera offset from head bob + landing dip (camera-local metres).</summary>
         public Vector3 ViewBobOffset { get; private set; }
@@ -372,6 +406,62 @@ namespace Ion.Gameplay
             _fovZeta = zeta;
         }
 
+        // ---------------------------------------------------------------- lens view
+
+        /// <summary>
+        /// Springs the view FOV to <paramref name="fovDegrees"/> (clamped to <see cref="MinViewFov"/>..<see cref="MaxViewFov"/>):
+        /// a lens's view while its viewfinder or a photo taken through it is raised. Uses the photo-raise spring unless
+        /// given another (<paramref name="freqHz"/>, <paramref name="zeta"/>); instant with reduced motion. The FOV kicks
+        /// still play on top, scaled to the narrower view.
+        /// </summary>
+        public void SetLensView(float fovDegrees, float freqHz = Feel.RaiseFreq, float zeta = Feel.RaiseZeta)
+        {
+            if (float.IsNaN(fovDegrees)) return;
+            _lensTarget = Mathf.Clamp(fovDegrees, MinViewFov, MaxViewFov);
+            _lensFreq = freqHz;
+            _lensZeta = zeta;
+            if (float.IsNaN(_lensFov))
+            {
+                _lensFov = _baseFov;
+                _lensVelocity = 0f;
+            }
+            if (Feel.ReducedMotion) SnapLensView();
+        }
+
+        /// <summary>Springs the view back to <see cref="BaseFieldOfView"/> (instant with reduced motion).</summary>
+        public void ClearLensView(float freqHz = Feel.RaiseFreq, float zeta = Feel.RaiseZeta)
+        {
+            _lensTarget = float.NaN;
+            if (float.IsNaN(_lensFov)) return;
+            _lensFreq = freqHz;
+            _lensZeta = zeta;
+            if (Feel.ReducedMotion) SnapLensView();
+        }
+
+        /// <summary>Ends the lens spring at its target now (the base FOV when cleared).</summary>
+        void SnapLensView()
+        {
+            _lensFov = _lensTarget;
+            _lensVelocity = 0f;
+            ApplyViewEffects();
+        }
+
+        void StepLensView(float dt)
+        {
+            if (float.IsNaN(_lensFov)) return;
+            float target = float.IsNaN(_lensTarget) ? _baseFov : _lensTarget;
+            if (Feel.ReducedMotion) _lensFov = target;
+            else Spring.Step(ref _lensFov, ref _lensVelocity, target, _lensFreq, _lensZeta, dt);
+            _lensFov = Mathf.Clamp(_lensFov, MinViewFov, MaxViewFov);
+            // Home again: drop the lens view so the view is exactly the base FOV (no lingering float error).
+            if (float.IsNaN(_lensTarget) && Mathf.Abs(_lensFov - _baseFov) < 0.01f && Mathf.Abs(_lensVelocity) < 0.1f)
+            {
+                _lensFov = float.NaN;
+                _lensVelocity = 0f;
+                if (_camera != null) _camera.fieldOfView = _baseFov + _fovKick;
+            }
+        }
+
         /// <summary>Initial velocity that makes a spring at rest peak at <paramref name="peak"/>.</summary>
         static float ImpulseForPeak(float peak, float freqHz, float zeta)
         {
@@ -392,6 +482,11 @@ namespace Ion.Gameplay
             _bobAmount = 0f;
             _dip = _dipVelocity = 0f;
             if (float.IsNaN(_fovHold)) _fovKick = _fovKickVelocity = 0f;
+            if (!float.IsNaN(_lensFov))
+            {
+                _lensFov = _lensTarget; // a lens view lands on its target (NaN: back to the base FOV)
+                _lensVelocity = 0f;
+            }
             ApplyViewEffects();
         }
 
@@ -426,6 +521,7 @@ namespace Ion.Gameplay
                 Spring.Step(ref _fovKick, ref _fovKickVelocity, 0f, _fovFreq, _fovZeta, dt);
                 _fovKick = Mathf.Clamp(_fovKick, -8f, 8f);
             }
+            StepLensView(dt);
 
             ApplyViewEffects();
         }
@@ -439,6 +535,8 @@ namespace Ion.Gameplay
             if (_camera == null) return;
             _camera.transform.localPosition = _eyeLocal + offset;
             float fov = _baseFov + _fovKick;
+            // A lens view replaces the base; the kicks keep their feel relative to it.
+            if (!float.IsNaN(_lensFov)) fov = Mathf.Max(MinViewFov, _lensFov + _fovKick * (_lensFov / Mathf.Max(MinViewFov, _baseFov)));
             if (!Mathf.Approximately(_camera.fieldOfView, fov)) _camera.fieldOfView = fov;
         }
 
@@ -475,6 +573,7 @@ namespace Ion.Gameplay
             Vector2 px = IonInput.LookDelta;
             if (px.sqrMagnitude < 1e-8f) return;
             Vector2 delta = px * MouseSensitivity; // NOT * deltaTime
+            if (!float.IsNaN(_lensFov)) delta *= LookScale; // a narrow lens view turns slower: the image moves as before per pixel
             _yaw = Mathf.Repeat(_yaw + delta.x, 360f);
             _pitch = Mathf.Clamp(_pitch - delta.y, -MaxPitch, MaxPitch);
             ApplyRotation();

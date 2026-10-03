@@ -8,8 +8,9 @@ namespace Ion.Presentation.Motion
     /// <see cref="Spring.Step(ref float, ref float, float, float, float, float)"/>.
     /// Also holds the two motion-related player preferences (reduced motion, raise hold / toggle).
     /// Owner: Lead D. Read by B (Mover timings), E (rewind timing for the tape dip) and everyone animating.
+    /// Partial, so a feature's own timings (for example a lens kit's) can join this one table from their own file.
     /// </summary>
-    public static class Feel
+    public static partial class Feel
     {
         // ---------------------------------------------------------------- photo held up
         public const float RaiseFreq = 2.6f, RaiseZeta = 0.82f;          // ≈ 0.34 s, ≈ 2% overshoot

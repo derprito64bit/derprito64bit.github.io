@@ -1508,18 +1508,13 @@ namespace Ion.Projection
         /// Renders the view at <paramref name="pose"/> into <paramref name="target"/>, excluding the Player
         /// and PhotoUI layers. Uses RenderPipeline.SubmitRenderRequest (StandardRequest) under URP and
         /// Camera.Render() otherwise, then reads the pixels back synchronously (fine on WebGL).
+        /// <paramref name="projection"/>: a projection matrix to render with instead of the one from
+        /// <paramref name="fovY"/> / <paramref name="aspect"/> (e.g. an off-axis shear for capture-time depth of field);
+        /// null renders exactly the preview as before.
         /// </summary>
-        void RenderInto(Texture2D target, Pose pose, float fovY, float aspect)
+        internal void RenderInto(Texture2D target, Pose pose, float fovY, float aspect, Matrix4x4? projection = null)
         {
             int width = target.width, height = target.height;
-
-            Camera cam = EnsurePreviewCamera();
-            cam.transform.SetPositionAndRotation(pose.position, pose.rotation);
-            cam.fieldOfView = fovY;
-            cam.aspect = aspect;
-            cam.nearClipPlane = HoldNear;
-            cam.farClipPlane = PreviewFar;
-            cam.cullingMask = ~ExcludedLayerMask;
 
             var desc = new RenderTextureDescriptor(width, height, RenderTextureFormat.ARGB32, 24)
             {
@@ -1527,27 +1522,57 @@ namespace Ion.Projection
                 msaaSamples = 1,
             };
             RenderTexture rt = RenderTexture.GetTemporary(desc);
-            cam.targetTexture = rt;
-
-            var request = new RenderPipeline.StandardRequest();
-            if (GraphicsSettings.currentRenderPipeline != null && RenderPipeline.SupportsRenderRequest(cam, request))
+            try
             {
-                request.destination = rt;
-                RenderPipeline.SubmitRenderRequest(cam, request);
+                RenderInto(rt, pose, fovY, aspect, projection);
+
+                RenderTexture previous = RenderTexture.active;
+                RenderTexture.active = rt;
+                target.ReadPixels(new Rect(0, 0, width, height), 0, 0, false);
+                target.Apply(true, false);
+                RenderTexture.active = previous;
             }
-            else
+            finally
             {
-                cam.Render();
+                RenderTexture.ReleaseTemporary(rt);
             }
+        }
 
-            RenderTexture previous = RenderTexture.active;
-            RenderTexture.active = rt;
-            target.ReadPixels(new Rect(0, 0, width, height), 0, 0, false);
-            target.Apply(true, false);
-            RenderTexture.active = previous;
+        /// <summary>
+        /// Renders the view at <paramref name="pose"/> into the render texture <paramref name="target"/> (no read-back),
+        /// with the preview camera and settings of the <see cref="Texture2D"/> overload: a capture-time effect can blend
+        /// several renders on the GPU and read back once.
+        /// </summary>
+        internal void RenderInto(RenderTexture target, Pose pose, float fovY, float aspect, Matrix4x4? projection = null)
+        {
+            Camera cam = EnsurePreviewCamera();
+            cam.transform.SetPositionAndRotation(pose.position, pose.rotation);
+            cam.fieldOfView = fovY;
+            cam.aspect = aspect;
+            cam.nearClipPlane = HoldNear;
+            cam.farClipPlane = PreviewFar;
+            cam.cullingMask = ~ExcludedLayerMask;
+            if (projection.HasValue) cam.projectionMatrix = projection.Value;
+            cam.targetTexture = target;
 
-            cam.targetTexture = null;
-            RenderTexture.ReleaseTemporary(rt);
+            try
+            {
+                var request = new RenderPipeline.StandardRequest();
+                if (GraphicsSettings.currentRenderPipeline != null && RenderPipeline.SupportsRenderRequest(cam, request))
+                {
+                    request.destination = target;
+                    RenderPipeline.SubmitRenderRequest(cam, request);
+                }
+                else
+                {
+                    cam.Render();
+                }
+            }
+            finally
+            {
+                cam.targetTexture = null;
+                if (projection.HasValue) cam.ResetProjectionMatrix();
+            }
         }
 
         static void DestroyObject(Object o)
