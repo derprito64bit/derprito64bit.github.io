@@ -84,6 +84,20 @@ namespace Ion.Tests
             return ps;
         }
 
+        /// <summary>A player holding up one photo, ready to place it (the projection system's placement count noted).</summary>
+        static PhotoHolder HoldUpAPhoto(out PhotoData photo, out PhotoInventory inventory, out ProjectionSystem ps, out int placementsBefore)
+        {
+            FirstPersonController fpc = MakePlayer();
+            ps = EnsureProjection();
+            placementsBefore = ps.PlacementCount;
+            inventory = fpc.GetComponent<PhotoInventory>();
+            photo = new PhotoData { FovY = 30f, Aspect = 4f / 3f, Label = "held" };
+            inventory.Add(photo);
+            PhotoHolder holder = fpc.GetComponent<PhotoHolder>();
+            Assert.IsTrue(holder.Raise());
+            return holder;
+        }
+
         static void RewindTo(ProjectionSystem ps, int count)
         {
             while (ps != null && ps.PlacementCount > count && ps.CanRewind) ps.Rewind();
@@ -95,27 +109,22 @@ namespace Ion.Tests
         public void NoLens_ViewFovIs70_AndTheCameraKeepsTodaysShape()
         {
             FirstPersonController fpc = MakePlayer();
-            Assert.AreEqual(70f, fpc.BaseFieldOfView);
             Assert.AreEqual(70f, fpc.ViewFov, "with no lens set, ViewFov = 70");
-            Assert.IsFalse(fpc.HasLensView);
-            Assert.AreEqual(1f, fpc.LookScale, "mouse look is unscaled");
-
             fpc.ResetViewEffects();
             StepView(fpc, 1f);
             fpc.ClearLensView(); // nothing to clear
-            Assert.IsFalse(fpc.HasLensView);
+            Assert.AreEqual(70f, fpc.BaseFieldOfView);
             Assert.AreEqual(70f, fpc.ViewFov);
             Assert.AreEqual(70f, fpc.Camera.fieldOfView);
+            Assert.IsFalse(fpc.HasLensView);
+            Assert.AreEqual(1f, fpc.LookScale, "mouse look is unscaled");
 
             InstantCamera cam = fpc.GetComponent<InstantCamera>();
             Assert.IsNull(cam.Lens);
             Assert.AreEqual(InstantCamera.CaptureFovY, cam.FovY);
             Assert.AreEqual(50f, cam.FovY);
-            Assert.AreEqual(0f, cam.Aperture);
-            Assert.AreEqual(0, cam.FilmStock);
-            Assert.IsFalse(cam.ClaimsSelectionInput);
-            Assert.IsNull(PhotoHolder.PlaceAllowedInZone);
-            Assert.IsTrue(PhotoHolder.IsPlaceAllowed(0));
+            Assert.IsTrue(cam.Aperture == 0f && cam.FilmStock == 0 && !cam.ClaimsSelectionInput, "no aperture, film stock or key claim");
+            Assert.IsTrue(PhotoHolder.PlaceAllowedInZone == null && PhotoHolder.IsPlaceAllowed(0), "no place guard");
         }
 
         // ------------------------------------------------------------------ lens view
@@ -130,15 +139,13 @@ namespace Ion.Tests
             {
                 Assert.AreEqual(70f, fpc.ViewFov, 1e-4f, "the lens view springs from the base, no jump");
                 StepView(fpc, 0.1f);
-                Assert.Less(fpc.ViewFov, 69f, "springing toward the lens");
-                Assert.Greater(fpc.ViewFov, 30f, "not there yet");
+                Assert.That(fpc.ViewFov, Is.InRange(30.5f, 69f), "springing toward the lens");
             }
             StepView(fpc, 3f);
             Assert.AreEqual(30f, fpc.ViewFov, 0.05f);
             Assert.AreEqual(fpc.ViewFov, fpc.Camera.fieldOfView, 1e-3f, "the camera shows the lens view");
             float expected = Mathf.Tan(fpc.ViewFov * 0.5f * Mathf.Deg2Rad) / Mathf.Tan(35f * Mathf.Deg2Rad);
             Assert.AreEqual(expected, fpc.LookScale, 1e-4f, "look scales by tan(view / 2) / tan(base / 2)");
-
             fpc.ResetViewEffects();
             Assert.AreEqual(30f, fpc.ViewFov, "a reset lands the lens view on its target");
 
@@ -157,7 +164,6 @@ namespace Ion.Tests
             fpc.ClearLensView();
             fpc.ResetViewEffects();
             Assert.IsFalse(fpc.HasLensView);
-            Assert.AreEqual(70f, fpc.ViewFov);
             Assert.AreEqual(70f, fpc.Camera.fieldOfView);
         }
 
@@ -166,8 +172,7 @@ namespace Ion.Tests
         [Test]
         public void Lens_SetAndClear_DrivesFovY_AndRaisesItsEvents()
         {
-            var go = new GameObject("LensSeamCamera");
-            InstantCamera cam = go.AddComponent<InstantCamera>();
+            InstantCamera cam = new GameObject("LensSeamCamera").AddComponent<InstantCamera>();
             int lensChanged = 0, changed = 0;
             cam.LensChanged += () => lensChanged++;
             cam.Changed += () => changed++;
@@ -180,26 +185,25 @@ namespace Ion.Tests
             cam.SetLens("85mm", 17.4f);
             Assert.AreEqual(1, lensChanged, "no event without a change");
 
-            cam.SetLens("odd", 500f);
-            Assert.AreEqual(InstantCamera.MaxLensFovY, cam.FovY);
-            cam.SetLens("odd", 0f);
-            Assert.AreEqual(InstantCamera.MinLensFovY, cam.FovY);
-            cam.SetLens("odd", float.NaN);
-            Assert.AreEqual(InstantCamera.CaptureFovY, cam.FovY);
+            foreach ((float fov, float clamped) in new[] { (500f, InstantCamera.MaxLensFovY), (0f, InstantCamera.MinLensFovY), (float.NaN, InstantCamera.CaptureFovY) })
+            {
+                cam.SetLens("odd", fov);
+                Assert.AreEqual(clamped, cam.FovY, "SetLens(" + fov + ")");
+            }
             cam.ClearLens();
             Assert.IsNull(cam.Lens);
             Assert.AreEqual(InstantCamera.CaptureFovY, cam.FovY);
 
             cam.Aperture = 2.8f;
+            cam.FilmStock = 3;
             Assert.AreEqual(2.8f, cam.Aperture);
+            Assert.AreEqual(3, cam.FilmStock);
             cam.Aperture = -1f;
-            Assert.AreEqual(0f, cam.Aperture);
+            cam.FilmStock = -2;
+            Assert.AreEqual(0f, cam.Aperture, "no negative f-number");
+            Assert.AreEqual(0, cam.FilmStock, "no negative stock");
             cam.Aperture = float.NaN;
             Assert.AreEqual(0f, cam.Aperture);
-            cam.FilmStock = 3;
-            Assert.AreEqual(3, cam.FilmStock);
-            cam.FilmStock = -2;
-            Assert.AreEqual(0, cam.FilmStock);
 
             // A failing subscriber is logged and never stops the lens change.
             cam.LensChanged += () => throw new InvalidOperationException("lens kit bug");
@@ -219,14 +223,8 @@ namespace Ion.Tests
             PhotoInventory inventory = fpc.GetComponent<PhotoInventory>();
             cam.SetUnlockedSilently(true);
             cam.Film = 3;
-
             int filmSeen = -1, photosSeen = -1, before = 0;
-            cam.BeforeCapture += () =>
-            {
-                before++;
-                filmSeen = cam.Film;
-                photosSeen = inventory.Count;
-            };
+            cam.BeforeCapture += () => { before++; filmSeen = cam.Film; photosSeen = inventory.Count; };
 
             PhotoData plain = cam.TryCapture();
             Assert.IsNotNull(plain);
@@ -258,12 +256,10 @@ namespace Ion.Tests
             PhotoHolder holder = fpc.GetComponent<PhotoHolder>();
             InstantCamera cam = fpc.GetComponent<InstantCamera>();
             Assert.IsFalse(holder.CameraClaimsInput);
-
             cam.SetUnlockedSilently(true);
             cam.SetCameraMode(true);
             Assert.IsTrue(cam.IsCameraMode);
             Assert.IsFalse(holder.CameraClaimsInput, "by default camera mode keeps today's controls");
-
             cam.ClaimsSelectionInput = true;
             Assert.IsTrue(holder.CameraClaimsInput, "a lens kit owns the wheel, digits and Q/E while the camera is out");
             cam.SetCameraMode(false);
@@ -275,19 +271,11 @@ namespace Ion.Tests
         [Test]
         public void PlaceGuard_Null_PlacesExactlyAsBefore()
         {
-            FirstPersonController fpc = MakePlayer();
-            PhotoHolder holder = fpc.GetComponent<PhotoHolder>();
-            PhotoInventory inventory = fpc.GetComponent<PhotoInventory>();
-            ProjectionSystem ps = EnsureProjection();
-            int before = ps.PlacementCount;
+            PhotoHolder holder = HoldUpAPhoto(out PhotoData photo, out PhotoInventory inventory, out ProjectionSystem ps, out int before);
             try
             {
-                var photo = new PhotoData { FovY = 30f, Aspect = 4f / 3f, Label = "free" };
-                inventory.Add(photo);
                 int placed = 0;
                 holder.PlacedPhoto += p => placed++;
-                Assert.IsTrue(holder.Raise());
-
                 Assert.IsNull(PhotoHolder.PlaceAllowedInZone);
                 Assert.IsTrue(holder.Place(), "no guard: placing works as before");
                 Assert.AreEqual(before + 1, ps.PlacementCount);
@@ -301,32 +289,16 @@ namespace Ion.Tests
         [Test]
         public void PlaceGuard_ReturningFalse_RefusesPlace_AndThePhotoStaysHeld()
         {
-            FirstPersonController fpc = MakePlayer();
-            PhotoHolder holder = fpc.GetComponent<PhotoHolder>();
-            PhotoInventory inventory = fpc.GetComponent<PhotoInventory>();
-            ProjectionSystem ps = EnsureProjection();
-            int before = ps.PlacementCount;
+            PhotoHolder holder = HoldUpAPhoto(out PhotoData photo, out PhotoInventory inventory, out ProjectionSystem ps, out int before);
             try
             {
-                var photo = new PhotoData { FovY = 30f, Aspect = 4f / 3f, Label = "guarded" };
-                inventory.Add(photo);
                 int placed = 0;
                 holder.PlacedPhoto += p => placed++;
-                Assert.IsTrue(holder.Raise());
-
                 ZoneInfo.ZoneOfProvider = p => 7;
                 var asked = new List<int>();
                 var prompted = new List<int>();
-                PhotoHolder.PlaceAllowedInZone = zone =>
-                {
-                    asked.Add(zone);
-                    return false;
-                };
-                PhotoHolder.PlaceRefusedPrompt = zone =>
-                {
-                    prompted.Add(zone);
-                    return "This room is protected";
-                };
+                PhotoHolder.PlaceAllowedInZone = zone => { asked.Add(zone); return false; };
+                PhotoHolder.PlaceRefusedPrompt = zone => { prompted.Add(zone); return "This room is protected"; };
 
                 Assert.IsFalse(holder.Place(), "the guard refuses Place");
                 Assert.IsFalse(holder.PlaceWithPress(), "and the player's press");
@@ -360,19 +332,14 @@ namespace Ion.Tests
             PhotoHolder.PlaceAllowedInZone = zone => throw new InvalidOperationException("guard bug");
             LogAssert.Expect(LogType.Exception, new Regex("guard bug"));
             Assert.IsTrue(PhotoHolder.IsPlaceAllowed(3), "a broken guard never blocks the game");
-
-            PhotoHolder.PlaceAllowedInZone = null;
-            Assert.IsTrue(PhotoHolder.IsPlaceAllowed(3));
         }
 
         // ------------------------------------------------------------------ film branch (shaders)
 
-        static readonly string[] GradedShaders = { "Ion/FlatToon", "Ion/Backdrop", "Ion/GradientSky" };
-
         [Test]
         public void FilmBranch_CompilesForWebGL2_InEveryGradedShader()
         {
-            foreach (string name in GradedShaders)
+            foreach (string name in new[] { "Ion/FlatToon", "Ion/Backdrop", "Ion/GradientSky" })
             {
                 Shader shader = Shader.Find(name);
                 Assert.IsNotNull(shader, name);
@@ -381,22 +348,19 @@ namespace Ion.Tests
                 var filmPasses = new List<string>();
                 var errors = new List<string>();
                 for (int s = 0; s < data.SubshaderCount; s++)
+                for (int p = 0; p < data.GetSubshader(s).PassCount; p++)
                 {
-                    ShaderData.Subshader sub = data.GetSubshader(s);
-                    for (int p = 0; p < sub.PassCount; p++)
-                    {
-                        ShaderData.Pass pass = sub.GetPass(p);
-                        if (!pass.HasShaderStage(ShaderType.Vertex)) continue;
-                        // GLES3x (WebGL2) compiles every stage of the pass under the Vertex type.
-                        ShaderData.VariantCompileInfo info = pass.CompileVariant(ShaderType.Vertex, new string[0],
-                            ShaderCompilerPlatform.GLES3x, BuildTarget.WebGL);
-                        passes++;
-                        if (!info.Success) errors.Add(pass.Name + ": compile failed");
-                        foreach (ShaderMessage m in info.Messages)
-                            if (m.severity == ShaderCompilerMessageSeverity.Error)
-                                errors.Add(pass.Name + ": " + m.message + " (" + m.file + ":" + m.line + ")");
-                        if (UsesFilmGlobals(info)) filmPasses.Add(pass.Name);
-                    }
+                    ShaderData.Pass pass = data.GetSubshader(s).GetPass(p);
+                    if (!pass.HasShaderStage(ShaderType.Vertex)) continue;
+                    // GLES3x (WebGL2) compiles every stage of the pass under the Vertex type.
+                    ShaderData.VariantCompileInfo info = pass.CompileVariant(ShaderType.Vertex, new string[0],
+                        ShaderCompilerPlatform.GLES3x, BuildTarget.WebGL);
+                    passes++;
+                    if (!info.Success) errors.Add(pass.Name + ": compile failed");
+                    foreach (ShaderMessage m in info.Messages)
+                        if (m.severity == ShaderCompilerMessageSeverity.Error)
+                            errors.Add(pass.Name + ": " + m.message + " (" + m.file + ":" + m.line + ")");
+                    if (UsesFilmGlobals(info)) filmPasses.Add(pass.Name);
                 }
                 Debug.Log("[LensSeam] " + name + " GLES3x (WebGL2): " + passes + " passes compiled, " + errors.Count +
                           " errors, film globals in: " + string.Join(", ", filmPasses));
