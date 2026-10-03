@@ -1,0 +1,9 @@
+{
+  "contact": { "heading": "[PLACEHOLDER: contact heading]", "email": "[PLACEHOLDER: contact email]", "links": [{ "label": "[PLACEHOLDER: profile link label]", "url": "https://github.com/derprito64bit" }], "placeholder": true },
+  "chapters": [
+    { "id": "chapter-01", "title": "[PLACEHOLDER: chapter 1 title]", "body": "[PLACEHOLDER: a short paragraph of your story]", "placeholder": true },
+    { "id": "chapter-02", "title": "[PLACEHOLDER: chapter 2 title]", "body": "[PLACEHOLDER: a short paragraph of your story]", "placeholder": true },
+    { "id": "chapter-03", "title": "[PLACEHOLDER: chapter 3 title]", "body": "[PLACEHOLDER: a short paragraph of your story]", "placeholder": true }
+  ],
+  "portrait": { "image": "", "alt": "[PLACEHOLDER: portrait description]", "placeholder": true }
+}

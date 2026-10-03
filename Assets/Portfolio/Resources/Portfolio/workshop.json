@@ -1,0 +1,10 @@
+{
+  "robot": { "id": "robot", "title": "[PLACEHOLDER: robot name]", "blurb": "[PLACEHOLDER: what the robot does and what you built on it]", "links": [], "placeholder": true },
+  "cad": [
+    { "id": "cad-01", "title": "[PLACEHOLDER: CAD model 1 title]", "blurb": "[PLACEHOLDER: one line on what it is]", "model": "", "placeholder": true },
+    { "id": "cad-02", "title": "[PLACEHOLDER: CAD model 2 title]", "blurb": "[PLACEHOLDER: one line on what it is]", "model": "", "placeholder": true }
+  ],
+  "bench": [
+    { "id": "bench", "title": "[PLACEHOLDER: what is on the bench now]", "blurb": "[PLACEHOLDER: one line on it]", "model": "", "placeholder": true }
+  ]
+}

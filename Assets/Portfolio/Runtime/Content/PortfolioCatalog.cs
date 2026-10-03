@@ -23,6 +23,15 @@ namespace Ion.Portfolio
         /// cabinet plays the first project that has one.
         /// </summary>
         public string demo;
+        /// <summary>Links out (repository, write-up, video), shown on the wall label.</summary>
+        public List<LinkRef> links = new List<LinkRef>();
+        /// <summary>Images, videos, models and web builds of the project.</summary>
+        public List<MediaRef> media = new List<MediaRef>();
+        public List<string> tags = new List<string>();
+        /// <summary>True until the owner supplies the facts: every visible string then reads "[PLACEHOLDER: ...]".</summary>
+        public bool placeholder;
+        /// <summary>Where the visible text comes from once it is real (an owner-facts.md anchor).</summary>
+        public string source;
 
         public Color AccentColor =>
             ColorUtility.TryParseHtmlString(string.IsNullOrEmpty(accent) ? "#6B1E2A" : accent, out Color c) ? c : new Color(0.42f, 0.12f, 0.16f);
@@ -48,7 +57,7 @@ namespace Ion.Portfolio
 
     /// <summary>
     /// The owner's project list, read once from Resources/Portfolio/projects.json. The file is validated by
-    /// PortfolioCatalogTests; at run time a missing or empty file yields an empty list (the gallery shows blanks).
+    /// ContentTests; at run time a missing or empty file yields an empty list (the gallery shows blanks).
     /// </summary>
     public static class PortfolioCatalog
     {
