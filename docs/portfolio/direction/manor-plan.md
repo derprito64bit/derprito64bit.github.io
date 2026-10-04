@@ -5,6 +5,27 @@
 > **D-022 (2026-10-03): the repo is standalone.** Every `up/*` seam step, the Seams crew and M-D021 below are
 > superseded. Engine changes, new `Mat`s in `Palette.cs` and `Surface.cs` included, go straight into the owning crew's
 > branch from `origin/main` (palette: #23). Crew issue numbers changed; see `docs/portfolio/agents/ISSUES.md`.
+>
+> **D-023 (owner, 2026-10-04): the Manor is the game's world, not the website's door.** The website (portfolio-site) is
+> a standalone portfolio of all the owner's work, and the game is one project in it, with its own project page and a
+> "Play" link to `/manor/`. The `canEnterManor` desktop guard stays: `publish.ps1` sends visitors who fail it to the
+> game's project page on the site (`/work/<slug>/` of the content entry whose demo is `/manor/`, with `?from=manor`),
+> and publishing fails if that page is missing. Anything below about the website's door, the website's "Enter the
+> Manor" and "Straight to the Grand Gallery" links, the ink drip, a handoff print or the website's beat 4 (including
+> a Painting Worlds teaser there) is superseded. The game's own loader buttons, "Enter the Manor" and "Go straight to
+> the Grand Gallery" (M-D018, M-C5), stand, as do the Manor's rooms, budgets, loader and accessibility contract. The
+> loader's "Read everything as a page" (M-D018) goes to the game's project page, the same page the guard uses; its
+> Play block ends with an "All work" link to the full sheet. Decisions: `docs/portfolio/agents/decisions.md`, D-023 to
+> D-026.
+>
+> **Game-side follow-ups (D-023).** (1) The site's content gains the game's own entry (demo `/manor/`). Before any
+> sync-content carries it, M-C2 (`Assets/Portfolio/Runtime/Rooms/Gallery/**`) makes the Grand Gallery skip the entry
+> whose demo is `/manor/`: the arcade cabinet keeps `DefaultDemo` instead of loading the game inside itself
+> (`GrandGallery.cs:88-97`), and the game does not hang in its own gallery (default; the owner may choose otherwise).
+> (2) `site/index.html`, today's root landing page ("Enter the Manor"), is retired by W-R's first compose of the
+> site's dist (portfolio-site #12): nothing copies it, W-R deletes it, and W-R's compose check fails a publish whose
+> `/` still shows the website's old door. (3) `identity.json` keeps `inkDrip` for the M overlay crew's
+> `/manor/` loader first frame (#14100E, M-C5); nothing reads it today.
 
 # Manor plan: final (M-Manager, Wave 1b)
 
