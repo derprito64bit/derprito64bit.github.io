@@ -61,7 +61,7 @@ To rebase a seam branch onto the latest upstream: `git switch up/<seam>; git reb
 
 | Path | Source |
 |---|---|
-| `/` | `portfolio-site/dist` (next to this repo) once it has an `index.html`; until then the fork's `site/` landing page. `404.html` only if the site has one. |
+| `/` | `portfolio-site/dist` (next to this repo) once it has an `index.html`; until then the fork's `site/` landing page. `404.html` only if the site has one. **D-023 (2026-10-04):** W-R (portfolio-site #12) retires the landing page: `/` serves only the portfolio's dist, W-R deletes `site/index.html`, and it rewrites this row when it lands. |
 | `/manor/` | The Unity Web build (`Build/Web`). Its `index.html` gets a phone guard (touch screens under 820 px go to `/?from=manor`, where the landing page says why and links `manor/?force=1`, which skips the guard) and `robots noindex`, injected at publish time. **D-023 (2026-10-04):** W-R (portfolio-site #12) replaces this with the `canEnterManor` guard, which sends visitors who fail it to the game's project page on the site (`/work/<slug>/?from=manor`), and rewrites this row when it lands. The WebGL template stays untouched. |
 | `/play/` | A redirect stub to `/manor/` that keeps the query string and hash, so old links still work. |
 | `/arcade/` | `site/arcade/`: HTML5 demos shared by the site and the Manor's cabinet (`../arcade/<slug>/` from `/manor/`). |

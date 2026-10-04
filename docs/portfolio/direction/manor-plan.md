@@ -23,7 +23,8 @@
 > whose demo is `/manor/`: the arcade cabinet keeps `DefaultDemo` instead of loading the game inside itself
 > (`GrandGallery.cs:88-97`), and the game does not hang in its own gallery (default; the owner may choose otherwise).
 > (2) `site/index.html`, today's root landing page ("Enter the Manor"), is retired by W-R's first compose of the
-> site's dist (portfolio-site #12); nothing copies it. (3) `identity.json` keeps `inkDrip` for the M overlay crew's
+> site's dist (portfolio-site #12): nothing copies it, W-R deletes it, and W-R's compose check fails a publish whose
+> `/` still shows the website's old door. (3) `identity.json` keeps `inkDrip` for the M overlay crew's
 > `/manor/` loader first frame (#14100E, M-C5); nothing reads it today.
 
 # Manor plan: final (M-Manager, Wave 1b)
