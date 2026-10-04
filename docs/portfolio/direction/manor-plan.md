@@ -14,8 +14,17 @@
 > Manor" and "Straight to the Grand Gallery" links, the ink drip, a handoff print or the website's beat 4 (including
 > a Painting Worlds teaser there) is superseded. The game's own loader buttons, "Enter the Manor" and "Go straight to
 > the Grand Gallery" (M-D018, M-C5), stand, as do the Manor's rooms, budgets, loader and accessibility contract. The
-> loader's "Read everything as a page" (M-D018) goes to the game's project page, the same page the guard uses.
-> Decisions: `docs/portfolio/agents/decisions.md`, D-023 to D-026.
+> loader's "Read everything as a page" (M-D018) goes to the game's project page, the same page the guard uses; its
+> Play block ends with an "All work" link to the full sheet. Decisions: `docs/portfolio/agents/decisions.md`, D-023 to
+> D-026.
+>
+> **Game-side follow-ups (D-023).** (1) The site's content gains the game's own entry (demo `/manor/`). Before any
+> sync-content carries it, M-C2 (`Assets/Portfolio/Runtime/Rooms/Gallery/**`) makes the Grand Gallery skip the entry
+> whose demo is `/manor/`: the arcade cabinet keeps `DefaultDemo` instead of loading the game inside itself
+> (`GrandGallery.cs:88-97`), and the game does not hang in its own gallery (default; the owner may choose otherwise).
+> (2) `site/index.html`, today's root landing page ("Enter the Manor"), is retired by W-R's first compose of the
+> site's dist (portfolio-site #12); nothing copies it. (3) `identity.json` keeps `inkDrip` for the M overlay crew's
+> `/manor/` loader first frame (#14100E, M-C5); nothing reads it today.
 
 # Manor plan: final (M-Manager, Wave 1b)
 
