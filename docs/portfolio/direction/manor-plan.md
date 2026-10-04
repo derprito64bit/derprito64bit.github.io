@@ -5,6 +5,13 @@
 > **D-022 (2026-10-03): the repo is standalone.** Every `up/*` seam step, the Seams crew and M-D021 below are
 > superseded. Engine changes, new `Mat`s in `Palette.cs` and `Surface.cs` included, go straight into the owning crew's
 > branch from `origin/main` (palette: #23). Crew issue numbers changed; see `docs/portfolio/agents/ISSUES.md`.
+>
+> **D-023 (owner, 2026-10-04): the Manor is the game's world, not the website's door.** The website (portfolio-site) is
+> a standalone portfolio of all the owner's work, and the game is one project in it, with its own project page and a
+> "Play" link to `/manor/` (the `canEnterManor` desktop guard stays; visitors who fail it go to the game's project
+> page). Anything below about arriving from the website's door, "Enter the Manor" or "Straight to the Grand Gallery"
+> links, the ink drip, a handoff print or the website's beat 4 is superseded. The Manor's own rooms, budgets, loader
+> and accessibility contract stand. Decisions: `docs/portfolio/agents/decisions.md`, D-023 to D-026.
 
 # Manor plan: final (M-Manager, Wave 1b)
 
