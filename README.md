@@ -1,8 +1,10 @@
-# derprito64bit · portfolio
+# derprito64bit.github.io
 
-The Manor: a candlelit gallery of my projects that you can walk through in the browser.
+The Manor: my Unity game, a candlelit gallery you can walk through in the browser. It is one project in my
+portfolio at https://derprito64bit.github.io/ (source: [portfolio-site](https://github.com/derprito64bit/portfolio-site)).
+This repo holds the game and composes the published site.
 
-**Visit:** https://derprito64bit.github.io/ · **Walk in:** [Grand Gallery](https://derprito64bit.github.io/play/?zone=gallery) · [foyer](https://derprito64bit.github.io/play/) · [photo puzzles](https://derprito64bit.github.io/play/?zone=game)
+**Portfolio:** https://derprito64bit.github.io/ · **Play:** [Grand Gallery](https://derprito64bit.github.io/play/?zone=gallery) · [foyer](https://derprito64bit.github.io/play/) · [photo puzzles](https://derprito64bit.github.io/play/?zone=game)
 
 Built on [project]ion, a collaboration with [Vasiniks](https://github.com/Vasiniks). Original repo: https://github.com/Vasiniks/project.ion. Fork notes: [docs/FORK.md](docs/FORK.md).
 

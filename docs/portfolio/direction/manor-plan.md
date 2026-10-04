@@ -8,10 +8,14 @@
 >
 > **D-023 (owner, 2026-10-04): the Manor is the game's world, not the website's door.** The website (portfolio-site) is
 > a standalone portfolio of all the owner's work, and the game is one project in it, with its own project page and a
-> "Play" link to `/manor/` (the `canEnterManor` desktop guard stays; visitors who fail it go to the game's project
-> page). Anything below about arriving from the website's door, "Enter the Manor" or "Straight to the Grand Gallery"
-> links, the ink drip, a handoff print or the website's beat 4 is superseded. The Manor's own rooms, budgets, loader
-> and accessibility contract stand. Decisions: `docs/portfolio/agents/decisions.md`, D-023 to D-026.
+> "Play" link to `/manor/`. The `canEnterManor` desktop guard stays: `publish.ps1` sends visitors who fail it to the
+> game's project page on the site (`/work/<slug>/` of the content entry whose demo is `/manor/`, with `?from=manor`),
+> and publishing fails if that page is missing. Anything below about the website's door, the website's "Enter the
+> Manor" and "Straight to the Grand Gallery" links, the ink drip, a handoff print or the website's beat 4 (including
+> a Painting Worlds teaser there) is superseded. The game's own loader buttons, "Enter the Manor" and "Go straight to
+> the Grand Gallery" (M-D018, M-C5), stand, as do the Manor's rooms, budgets, loader and accessibility contract. The
+> loader's "Read everything as a page" (M-D018) goes to the game's project page, the same page the guard uses.
+> Decisions: `docs/portfolio/agents/decisions.md`, D-023 to D-026.
 
 # Manor plan: final (M-Manager, Wave 1b)
 

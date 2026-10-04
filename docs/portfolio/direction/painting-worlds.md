@@ -99,7 +99,7 @@ US public domain: published 1930 or earlier until 2027-01-01, then 1931. Museum 
 - Orchestrator / Lead A: log that Painting Worlds are exempt from art-bible rules 2, 6 and 7 but bound by every rules.unity.md limit. Record that Ion/PaintToon is a fork-owned FlatToon copy, with drift caught by a parity test.
 - Orchestrator: fix the plan's rights rule (1930 or earlier until 2027-01-01, then 1931), its star count (10 stars plus Venus) and its Mondrian row (cut).
 - Manor Bridge / Overlay: carry the page's prefers-reduced-motion into Feel.ReducedMotion at boot (compose-time injection; Lead D's template untouched) so painted skies and ribbons freeze for those visitors (non-negotiable 4).
-- IA & Content Model: if the Front Door teases Painting Worlds (beat 4 teaser), add a worlds entry to content/ (title, artist, year, holding museum, licence) so wall labels and the 2D teaser share one source.
+- IA & Content Model: if the Front Door teases Painting Worlds (beat 4 teaser), add a worlds entry to content/ (title, artist, year, holding museum, licence) so wall labels and the 2D teaser share one source. (D-023, 2026-10-04: there is no beat-4 teaser on the site. The live worlds from `worlds.json` appear as text on the game's project page, portfolio-site W-D021; the shared worlds entry still serves the wall labels.)
 - Budgets: zone limits are unchanged (120 batches, 60k tris, 8 Ultra lights). The pilot's 90-batch and 20k-tri targets are G-internal.
 - Springs and tokens: none needed. The world loading cover reuses the existing develop flash; the gilt frame uses M's gilt Mat.
 
